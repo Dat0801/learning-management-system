@@ -1,0 +1,56 @@
+<div class="student-layout">
+  <header class="top-nav">
+    <div class="container">
+      <div class="logo-area">
+        <a routerLink="/" class="logo">
+          <!-- Placeholder for logo if image is missing, just use text or simple icon -->
+          <div class="logo-icon">LMS</div>
+          <span class="lms-name">Learning Platform</span>
+        </a>
+      </div>
+      
+      <button class="mobile-menu-btn" (click)="toggleMenu()" aria-label="Toggle navigation">
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+      </button>
+
+      <nav class="nav-menu" [class.active]="isMenuOpen">
+        <ul>
+          <li><a routerLink="/home" routerLinkActive="active" (click)="isMenuOpen = false">Home</a></li>
+          <li><a routerLink="/courses" routerLinkActive="active" (click)="isMenuOpen = false">Courses</a></li>
+          <li *ngIf="user"><a routerLink="/my-learning" routerLinkActive="active" (click)="isMenuOpen = false">My Learning</a></li>
+          
+          <!-- Guest Links -->
+          <li *ngIf="!user" class="guest-links">
+            <a routerLink="/auth/login" class="nav-link" (click)="isMenuOpen = false">Login</a>
+            <a routerLink="/auth/register" class="btn-register" (click)="isMenuOpen = false">Register</a>
+          </li>
+
+          <!-- Desktop User Dropdown -->
+          <li class="user-menu-item desktop-only" *ngIf="user">
+            <div class="user-dropdown-trigger" (click)="toggleUserDropdown()">
+              <span class="user-name">{{ user?.name || 'User' }}</span>
+              <div class="user-avatar">{{ user?.name?.charAt(0) || 'U' }}</div>
+            </div>
+            
+            <div class="dropdown-menu" *ngIf="isUserDropdownOpen">
+              <a routerLink="/profile" (click)="isUserDropdownOpen = false; isMenuOpen = false">Profile</a>
+              <button (click)="logout()" class="logout-btn">Logout</button>
+            </div>
+          </li>
+
+          <!-- Mobile User Links -->
+          <li class="mobile-only"><a routerLink="/profile" routerLinkActive="active" (click)="isMenuOpen = false">Profile</a></li>
+          <li class="mobile-only"><button (click)="logout()" class="mobile-logout-btn">Logout</button></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main class="content-area">
+    <div class="container">
+      <router-outlet></router-outlet>
+    </div>
+  </main>
+</div>

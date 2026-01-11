@@ -1,0 +1,26 @@
+<div class="course-card" [routerLink]="['/courses', course.id]">
+  <div class="thumbnail">
+    <img *ngIf="course.thumbnail" [src]="course.thumbnail" [alt]="course.title">
+    <div *ngIf="!course.thumbnail" class="placeholder-img">
+      <span>{{ course.title | slice:0:1 }}</span>
+    </div>
+  </div>
+  
+  <div class="content">
+    <h3 class="title" [title]="course.title">{{ course.title }}</h3>
+    <p class="instructor">By {{ course.instructor?.name }}</p>
+    
+    <div class="footer">
+      <div *ngIf="course.is_enrolled; else notEnrolled" class="enrolled-status">
+        <div class="progress-bar-container">
+          <div class="progress-bar" [style.width.%]="course.progress || 0"></div>
+        </div>
+        <span class="progress-text">{{ course.progress || 0 }}% Complete</span>
+      </div>
+      
+      <ng-template #notEnrolled>
+        <span class="price">${{ course.price }}</span>
+      </ng-template>
+    </div>
+  </div>
+</div>

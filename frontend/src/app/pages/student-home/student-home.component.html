@@ -1,0 +1,36 @@
+<div class="student-home">
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-content">
+      <h1>Welcome back, {{ userName }}!</h1>
+      <p>Continue your learning journey or explore new courses to expand your skills.</p>
+      <a routerLink="/courses" class="btn btn-primary">Browse All Courses</a>
+    </div>
+  </section>
+
+  <!-- Recommended Courses -->
+  <section class="section recommended-section" *ngIf="recommendedCourses.length > 0">
+    <div class="section-header">
+      <h2>Recommended for You</h2>
+      <a routerLink="/courses" class="see-all">See All</a>
+    </div>
+    <div class="course-grid">
+      <app-course-card *ngFor="let course of recommendedCourses" [course]="course"></app-course-card>
+    </div>
+  </section>
+
+  <!-- Popular Courses -->
+  <section class="section popular-section" *ngIf="popularCourses.length > 0">
+    <div class="section-header">
+      <h2>Popular Courses</h2>
+      <a routerLink="/courses" class="see-all">See All</a>
+    </div>
+    <div class="course-grid">
+      <app-course-card *ngFor="let course of popularCourses" [course]="course"></app-course-card>
+    </div>
+  </section>
+  
+  <div *ngIf="recommendedCourses.length === 0 && popularCourses.length === 0" class="loading-state">
+    <p>Loading your personalized dashboard...</p>
+  </div>
+</div>

@@ -1,0 +1,108 @@
+.course-card {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #edf2f7;
+  cursor: pointer;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  }
+
+  .thumbnail {
+    height: 160px;
+    background-color: #cbd5e0;
+    position: relative;
+    overflow: hidden;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .placeholder-img {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      font-size: 3rem;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+  }
+
+  .content {
+    padding: 1.25rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+
+    .title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #2d3748;
+      margin: 0 0 0.5rem 0;
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .instructor {
+      font-size: 0.875rem;
+      color: #718096;
+      margin-bottom: 1rem;
+    }
+
+    .footer {
+      margin-top: auto;
+      padding-top: 1rem;
+      border-top: 1px solid #edf2f7;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      .price {
+        font-weight: 700;
+        color: #2b6cb0;
+        font-size: 1.1rem;
+      }
+
+      .enrolled-status {
+        width: 100%;
+
+        .progress-bar-container {
+          height: 6px;
+          background-color: #edf2f7;
+          border-radius: 3px;
+          overflow: hidden;
+          margin-bottom: 0.25rem;
+        }
+
+        .progress-bar {
+          height: 100%;
+          background-color: #48bb78;
+          border-radius: 3px;
+        }
+
+        .progress-text {
+          font-size: 0.75rem;
+          color: #718096;
+          display: block;
+          text-align: right;
+        }
+      }
+    }
+  }
+}

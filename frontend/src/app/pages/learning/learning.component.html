@@ -1,0 +1,85 @@
+<div class="learning-container" *ngIf="course && currentLesson; else loadingTpl">
+  
+  <!-- Main Content Area -->
+  <div class="main-content" [class.full-width]="!sidebarOpen">
+    <div class="top-bar">
+      <a [routerLink]="['/courses', course.id]" class="back-link">← Back to Course</a>
+      <button class="toggle-sidebar-btn" (click)="toggleSidebar()">
+        {{ sidebarOpen ? 'Hide Sidebar' : 'Show Sidebar' }}
+      </button>
+    </div>
+
+    <div class="video-player">
+      <!-- Placeholder for Video Player -->
+      <div class="player-placeholder">
+        <div class="play-icon">▶</div>
+        <p>Video for: {{ currentLesson.title }}</p>
+      </div>
+    </div>
+
+    <div class="lesson-details">
+      <div class="lesson-header">
+        <h1>{{ currentLesson.title }}</h1>
+        <div class="actions">
+            <button class="btn-nav" (click)="prevLesson()" [disabled]="currentLesson.id === course.lessons![0].id">Previous</button>
+            <button 
+                class="btn-complete" 
+                [class.completed]="currentLesson.is_completed"
+                (click)="toggleCompletion()"
+            >
+                {{ currentLesson.is_completed ? 'Mark Incomplete' : 'Mark Complete' }}
+            </button>
+            <button class="btn-nav" (click)="nextLesson()" [disabled]="currentLesson.id === course.lessons![course.lessons!.length - 1].id">Next</button>
+        </div>
+      </div>
+      <div class="lesson-description">
+        <h3>Description</h3>
+        <p>{{ currentLesson.content || 'No description available for this lesson.' }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sidebar -->
+  <div class="sidebar" *ngIf="sidebarOpen">
+    <div class="sidebar-header">
+      <h3>Course Content</h3>
+      <div class="progress-container">
+        <div class="progress-info">
+            <span>{{ progress }}% Complete</span>
+        </div>
+        <div class="progress-bar">
+          <div class="fill" [style.width.%]="progress"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="lesson-list">
+      <div 
+        class="lesson-item" 
+        *ngFor="let lesson of course.lessons; let i = index"
+        [class.active]="lesson.id === currentLesson.id"
+        [class.completed]="lesson.is_completed"
+        (click)="selectLesson(lesson)"
+      >
+        <div class="status-indicator">
+          <span *ngIf="lesson.is_completed" class="check">✓</span>
+          <span *ngIf="!lesson.is_completed && lesson.id !== currentLesson.id" class="lock">○</span>
+          <span *ngIf="lesson.id === currentLesson.id && !lesson.is_completed" class="play">▶</span>
+        </div>
+        <div class="lesson-info">
+          <span class="lesson-number">Lesson {{ i + 1 }}</span>
+          <span class="lesson-title">{{ lesson.title }}</span>
+          <!-- <span class="lesson-duration">10:00</span> -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<ng-template #loadingTpl>
+  <div class="loading-screen">
+    <div class="spinner"></div>
+    <p>Loading your learning environment...</p>
+  </div>
+</ng-template>

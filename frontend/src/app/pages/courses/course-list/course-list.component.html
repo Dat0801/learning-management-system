@@ -1,0 +1,33 @@
+<div class="courses-container">
+  <h2>Available Courses</h2>
+  
+  <div *ngIf="errorMessage" class="alert alert-error">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="successMessage" class="alert alert-success">
+    {{ successMessage }}
+  </div>
+
+  <div *ngIf="courses.length === 0" class="no-courses">
+    <p>No courses available at the moment.</p>
+  </div>
+
+  <div class="course-grid">
+    <div class="course-card" *ngFor="let course of courses">
+      <div class="card-header">
+        <h3>{{ course.title }}</h3>
+        <span class="price">${{ course.price }}</span>
+      </div>
+      
+      <div class="card-body">
+        <p class="instructor">Instructor: <strong>{{ course.instructor?.name }}</strong></p>
+        <p class="description">{{ course.description }}</p>
+      </div>
+
+      <div class="card-footer">
+        <button class="btn btn-primary" (click)="enroll(course.id)">Enroll Now</button>
+      </div>
+    </div>
+  </div>
+</div>

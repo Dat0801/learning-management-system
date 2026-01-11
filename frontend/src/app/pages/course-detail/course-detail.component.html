@@ -1,0 +1,71 @@
+<div class="course-detail-container" *ngIf="course; else loadingTpl">
+  <!-- Hero Section -->
+  <header class="course-header">
+    <div class="header-content">
+      <span class="badge" *ngIf="course.is_enrolled">Enrolled</span>
+      <h1>{{ course.title }}</h1>
+      <p class="description">{{ course.description }}</p>
+      
+      <div class="instructor-info" *ngIf="course.instructor">
+        <div class="avatar-placeholder">{{ course.instructor.name.charAt(0) }}</div>
+        <span>Created by <strong>{{ course.instructor.name }}</strong></span>
+      </div>
+
+      <div class="actions">
+        <button *ngIf="!course.is_enrolled" class="btn-primary" (click)="enroll()">
+          Enroll for ${{ course.price }}
+        </button>
+        <button *ngIf="course.is_enrolled" class="btn-secondary">
+          Continue Learning
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="main-content">
+    <!-- Video Preview Section -->
+    <section class="video-preview">
+      <h2>Course Preview</h2>
+      <div class="video-placeholder">
+        <div class="play-button">▶</div>
+        <p>Video Player Placeholder</p>
+      </div>
+    </section>
+
+    <!-- Curriculum Section -->
+    <section class="curriculum">
+      <h2>Curriculum</h2>
+      <div class="lesson-list">
+        <div 
+          class="lesson-item" 
+          *ngFor="let lesson of course.lessons"
+          [ngClass]="getLessonStatus(lesson)"
+        >
+          <div class="status-icon">
+            <span *ngIf="getLessonStatus(lesson) === 'completed'">✓</span>
+            <span *ngIf="getLessonStatus(lesson) === 'current'">▶</span>
+            <span *ngIf="getLessonStatus(lesson) === 'locked'">🔒</span>
+          </div>
+          <div class="lesson-info">
+            <h3>{{ lesson.title }}</h3>
+            <!-- <p class="duration">10:00</p> -->
+          </div>
+          <div class="lesson-action">
+            <button 
+              *ngIf="getLessonStatus(lesson) !== 'locked'" 
+              class="btn-text"
+              [routerLink]="['/learning', course.id]"
+              [queryParams]="{lesson: lesson.id}"
+            >
+              {{ getLessonStatus(lesson) === 'completed' ? 'Review' : 'Start' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<ng-template #loadingTpl>
+  <div class="loading">Loading course details...</div>
+</ng-template>
