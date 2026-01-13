@@ -27,7 +27,14 @@ export class LoginComponent {
   onSubmit() {
     if (this.loginForm.valid) {
       this.authService.login(this.loginForm.value).subscribe({
-        next: () => this.router.navigate(['/courses']),
+        next: () => {
+          const user = this.authService.getUser();
+          if (user && user.role === 'admin') {
+            this.router.navigate(['/admin/dashboard']);
+          } else {
+            this.router.navigate(['/courses']);
+          }
+        },
         error: (err) => {
             console.error(err);
             this.error = 'Invalid credentials';

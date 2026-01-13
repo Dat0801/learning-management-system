@@ -1,6 +1,8 @@
 import { Routes } from '@angular/router';
 import { StudentLayoutComponent } from './layouts/student-layout/student-layout.component';
+import { AdminLayoutComponent } from './layouts/admin-layout/admin-layout.component';
 import { authGuard } from './core/guards/auth.guard';
+import { AdminGuard } from './core/guards/admin.guard';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'home', pathMatch: 'full' },
@@ -35,6 +37,30 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/learning/learning.component').then(m => m.LearningComponent),
         canActivate: [authGuard]
       }
+    ]
+  },
+  {
+    path: 'admin',
+    component: AdminLayoutComponent,
+    canActivate: [AdminGuard],
+    children: [
+      {
+        path: 'dashboard',
+        loadComponent: () => import('./pages/admin/admin-dashboard/admin-dashboard.component').then(m => m.AdminDashboardComponent)
+      },
+      {
+        path: 'users',
+        loadComponent: () => import('./pages/admin/user-management/user-management.component').then(m => m.UserManagementComponent)
+      },
+      {
+        path: 'courses',
+        loadComponent: () => import('./pages/admin/course-management/course-management.component').then(m => m.CourseManagementComponent)
+      },
+      {
+        path: 'enrollments',
+        loadComponent: () => import('./pages/admin/enrollment-management/enrollment-management.component').then(m => m.EnrollmentManagementComponent)
+      },
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
   }
 ];
