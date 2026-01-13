@@ -1,0 +1,71 @@
+<div class="dashboard">
+  <h1>Dashboard</h1>
+
+  <div class="stats-container" *ngIf="dashboardStats$ | async as stats">
+    <div class="stat-card">
+      <div class="stat-header">
+        <h3>Total Users</h3>
+        <span class="icon">👥</span>
+      </div>
+      <p class="stat-value">{{ stats.total_users }}</p>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-header">
+        <h3>Students</h3>
+        <span class="icon">🎓</span>
+      </div>
+      <p class="stat-value">{{ stats.total_students }}</p>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-header">
+        <h3>Instructors</h3>
+        <span class="icon">👨‍🏫</span>
+      </div>
+      <p class="stat-value">{{ stats.total_instructors }}</p>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-header">
+        <h3>Total Courses</h3>
+        <span class="icon">📚</span>
+      </div>
+      <p class="stat-value">{{ stats.total_courses }}</p>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-header">
+        <h3>Total Enrollments</h3>
+        <span class="icon">✏️</span>
+      </div>
+      <p class="stat-value">{{ stats.total_enrollments }}</p>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-header">
+        <h3>Revenue</h3>
+        <span class="icon">💰</span>
+      </div>
+      <p class="stat-value">${{ stats.revenue?.toFixed(2) || 0 }}</p>
+    </div>
+  </div>
+
+  <div class="quick-links">
+    <h2>Quick Links</h2>
+    <div class="links-grid">
+      <a routerLink="/admin/users" class="link-card">
+        <h3>Manage Users</h3>
+        <p>View and manage all users</p>
+      </a>
+      <a routerLink="/admin/courses" class="link-card">
+        <h3>Manage Courses</h3>
+        <p>View and manage all courses</p>
+      </a>
+      <a routerLink="/admin/enrollments" class="link-card">
+        <h3>Manage Enrollments</h3>
+        <p>View and manage enrollments</p>
+      </a>
+    </div>
+  </div>
+</div>

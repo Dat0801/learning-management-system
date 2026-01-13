@@ -1,0 +1,57 @@
+<div class="admin-layout">
+  <!-- Top Navigation -->
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <button class="toggle-btn" (click)="toggleSidebar()">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <h1>Admin Dashboard</h1>
+    </div>
+    <div class="navbar-right">
+      <div class="user-info" *ngIf="currentUser$ | async as user">
+        <span class="username">{{ user.name }}</span>
+      </div>
+      <button class="logout-btn" (click)="logout()">Logout</button>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="admin-container">
+    <!-- Sidebar -->
+    <aside class="sidebar" [class.collapsed]="!sidebarOpen">
+      <ul class="menu">
+        <li>
+          <a routerLink="/admin/dashboard" routerLinkActive="active">
+            <i class="icon">📊</i>
+            <span>Dashboard</span>
+          </a>
+        </li>
+        <li>
+          <a routerLink="/admin/users" routerLinkActive="active">
+            <i class="icon">👥</i>
+            <span>Users</span>
+          </a>
+        </li>
+        <li>
+          <a routerLink="/admin/courses" routerLinkActive="active">
+            <i class="icon">📚</i>
+            <span>Courses</span>
+          </a>
+        </li>
+        <li>
+          <a routerLink="/admin/enrollments" routerLinkActive="active">
+            <i class="icon">✏️</i>
+            <span>Enrollments</span>
+          </a>
+        </li>
+      </ul>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>

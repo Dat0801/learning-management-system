@@ -1,0 +1,84 @@
+<div class="course-management">
+  <h1>Course Management</h1>
+
+  <!-- Search and Filter -->
+  <div class="search-bar">
+    <input
+      type="text"
+      [(ngModel)]="searchTerm"
+      (keyup)="onSearch()"
+      placeholder="Search by title or description..."
+      class="search-input"
+    />
+    <select [(ngModel)]="selectedStatus" (change)="onSearch()" class="status-filter">
+      <option value="">All Statuses</option>
+      <option value="draft">Draft</option>
+      <option value="published">Published</option>
+      <option value="archived">Archived</option>
+    </select>
+  </div>
+
+  <!-- Courses Table -->
+  <div class="table-container" *ngIf="courses$ | async as response">
+    <table class="courses-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Title</th>
+          <th>Instructor</th>
+          <th>Price</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let course of response.data">
+          <td>{{ course.id }}</td>
+          <td>{{ course.title }}</td>
+          <td>{{ course.instructor?.name || 'N/A' }}</td>
+          <td>${{ course.price || 0 }}</td>
+          <td>
+            <span class="status-badge" [ngClass]="'status-' + (course.status || 'draft')">
+              {{ course.status || 'draft' }}
+            </span>
+          </td>
+          <td class="actions">
+            <button class="btn-edit" (click)="editCourse(course)">Edit</button>
+            <button class="btn-delete" (click)="deleteCourse(course.id)">Delete</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Edit Form -->
+  <div class="modal" *ngIf="showEditForm">
+    <div class="modal-content">
+      <h2>Edit Course</h2>
+      <form *ngIf="editingCourse">
+        <div class="form-group">
+          <label>Title</label>
+          <input type="text" [(ngModel)]="editingCourse.title" name="title" />
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea [(ngModel)]="editingCourse.description" name="description" rows="4"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Price</label>
+          <input type="number" [(ngModel)]="editingCourse.price" name="price" min="0" />
+        </div>
+        <div class="form-group">
+          <label>Status</label>
+          <select [(ngModel)]="editingCourse.status" name="status">
+            <option *ngFor="let status of statuses" [value]="status">{{ status }}</option>
+          </select>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn-save" (click)="saveCourse()">Save</button>
+          <button type="button" class="btn-cancel" (click)="cancelEdit()">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

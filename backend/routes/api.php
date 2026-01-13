@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CourseController;
 use App\Http\Controllers\Api\EnrollmentController;
+use App\Http\Controllers\Api\AdminController;
 
 /*
 |--------------------------------------------------------------------------
@@ -44,4 +45,26 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/lessons/{lesson}', [\App\Http\Controllers\Api\LessonController::class, 'show']);
     Route::post('/lessons/{lesson}/complete', [\App\Http\Controllers\Api\LessonController::class, 'complete']);
     Route::delete('/lessons/{lesson}/complete', [\App\Http\Controllers\Api\LessonController::class, 'incomplete']);
+});
+
+// Admin Routes
+Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function () {
+    // Dashboard
+    Route::get('/dashboard/stats', [AdminController::class, 'getDashboardStats']);
+
+    // User Management
+    Route::get('/users', [AdminController::class, 'getAllUsers']);
+    Route::get('/users/{user}', [AdminController::class, 'getUserDetail']);
+    Route::put('/users/{user}', [AdminController::class, 'updateUser']);
+    Route::delete('/users/{user}', [AdminController::class, 'deleteUser']);
+
+    // Course Management
+    Route::get('/courses', [AdminController::class, 'getAllCoursesAdmin']);
+    Route::get('/courses/{course}', [AdminController::class, 'getCourseDetail']);
+    Route::put('/courses/{course}', [AdminController::class, 'updateCourseAdmin']);
+    Route::delete('/courses/{course}', [AdminController::class, 'deleteCourseAdmin']);
+
+    // Enrollment Management
+    Route::get('/enrollments', [AdminController::class, 'getAllEnrollments']);
+    Route::delete('/enrollments/{enrollment}', [AdminController::class, 'deleteEnrollment']);
 });
