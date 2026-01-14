@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Course\StoreCourseRequest;
+use App\Http\Requests\Course\UpdateCourseRequest;
+use App\Http\Resources\CourseResource;
 use App\Services\CourseService;
 use Illuminate\Http\Request;
 
@@ -17,53 +20,69 @@ class CourseController extends Controller
 
     public function index()
     {
-        return response()->json($this->courseService->getAllCourses());
+        $courses = $this->courseService->getAllCourses();
+        return response()->json([
+            'success' => true,
+            'data' => CourseResource::collection($courses),
+        ]);
     }
 
     public function recommended()
     {
-        return response()->json($this->courseService->getRecommendedCourses());
+        $courses = $this->courseService->getRecommendedCourses();
+        return response()->json([
+            'success' => true,
+            'data' => CourseResource::collection($courses),
+        ]);
     }
 
     public function popular()
     {
-        return response()->json($this->courseService->getPopularCourses());
+        $courses = $this->courseService->getPopularCourses();
+        return response()->json([
+            'success' => true,
+            'data' => CourseResource::collection($courses),
+        ]);
     }
 
-    public function store(Request $request)
+    public function store(StoreCourseRequest $request)
     {
-        $request->validate([
-            'title' => 'required|string',
-            'price' => 'numeric',
-            'description' => 'nullable|string',
-        ]);
-
         $data = $request->all();
         $data['instructor_id'] = $request->user()->id;
 
         $course = $this->courseService->createCourse($data);
-        return response()->json($course, 201);
+        return response()->json([
+            'success' => true,
+            'message' => 'Course created',
+            'data' => new CourseResource($course),
+        ], 201);
     }
 
     public function show($id)
     {
-        return response()->json($this->courseService->getCourseById($id));
+        $course = $this->courseService->getCourseById($id);
+        return response()->json([
+            'success' => true,
+            'data' => new CourseResource($course),
+        ]);
     }
 
-    public function update(Request $request, $id)
+    public function update(UpdateCourseRequest $request, $id)
     {
-        $request->validate([
-            'title' => 'string',
-            'price' => 'numeric',
+        $course = $this->courseService->updateCourse($id, $request->all(), $request->user());
+        return response()->json([
+            'success' => true,
+            'message' => 'Course updated',
+            'data' => new CourseResource($course),
         ]);
-
-        $course = $this->courseService->updateCourse($id, $request->all());
-        return response()->json($course);
     }
 
     public function destroy($id)
     {
         $this->courseService->deleteCourse($id);
-        return response()->json(null, 204);
+        return response()->json([
+            'success' => true,
+            'message' => 'Course deleted',
+        ], 204);
     }
 }

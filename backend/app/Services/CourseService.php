@@ -38,8 +38,18 @@ class CourseService
         return $this->courseRepository->create($data);
     }
 
-    public function updateCourse($id, array $data)
+    public function updateCourse($id, array $data, $user = null)
     {
+        $course = $this->courseRepository->find($id);
+
+        if ($user && $user->role === 'instructor' && $course->instructor_id !== $user->id) {
+            abort(403, 'You are not allowed to update this course');
+        }
+
+        if (isset($data['status']) && $data['status'] === 'published' && $course->status !== 'published') {
+            $data['published_at'] = now();
+        }
+
         return $this->courseRepository->update($id, $data);
     }
 

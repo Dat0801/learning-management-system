@@ -11,7 +11,6 @@ class LessonController extends Controller
 {
     public function show(Lesson $lesson)
     {
-        // Check if user has access to this lesson's course
         $user = auth()->user();
         $course = $lesson->course;
         
@@ -21,7 +20,6 @@ class LessonController extends Controller
             return response()->json(['message' => 'You are not enrolled in this course.'], 403);
         }
 
-        // Add completion status
         $lesson->is_completed = LessonCompletion::where('user_id', $user->id)
             ->where('lesson_id', $lesson->id)
             ->exists();

@@ -21,15 +21,8 @@ class EnrollmentRepository implements EnrollmentRepositoryInterface
 
     public function getUserEnrollments($userId)
     {
-        $enrollments = Enrollment::where('user_id', $userId)
-                         ->with('course.instructor')
-                         ->get();
-
-        return $enrollments->map(function ($enrollment) {
-            $course = $enrollment->course;
-            $course->is_enrolled = true;
-            // $course->progress = $enrollment->progress ?? 0; 
-            return $course;
-        });
+        return Enrollment::where('user_id', $userId)
+            ->with('course.instructor')
+            ->get();
     }
 }

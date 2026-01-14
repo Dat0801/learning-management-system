@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\EnrollmentResource;
 use App\Services\EnrollmentService;
 use Illuminate\Http\Request;
 
@@ -19,14 +20,26 @@ class EnrollmentController extends Controller
     {
         try {
             $enrollment = $this->enrollmentService->enrollUser($request->user()->id, $courseId);
-            return response()->json($enrollment, 201);
+            return response()->json([
+                'success' => true,
+                'message' => 'Enrolled successfully',
+                'data' => new EnrollmentResource($enrollment->load('course.instructor')),
+            ], 201);
         } catch (\Exception $e) {
-            return response()->json(['message' => $e->getMessage()], 400);
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 400);
         }
     }
 
     public function myEnrollments(Request $request)
     {
-        return response()->json($this->enrollmentService->getUserEnrollments($request->user()->id));
+        $enrollments = $this->enrollmentService->getUserEnrollments($request->user()->id);
+
+        return response()->json([
+            'success' => true,
+            'data' => EnrollmentResource::collection($enrollments),
+        ]);
     }
 }
