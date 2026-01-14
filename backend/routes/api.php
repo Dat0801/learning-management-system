@@ -6,6 +6,8 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CourseController;
 use App\Http\Controllers\Api\EnrollmentController;
 use App\Http\Controllers\Api\AdminController;
+use App\Http\Controllers\Api\QuizController;
+use App\Http\Controllers\Api\LessonController;
 
 /*
 |--------------------------------------------------------------------------
@@ -42,9 +44,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/my-courses', [EnrollmentController::class, 'myEnrollments']);
 
     // Lessons
-    Route::get('/lessons/{lesson}', [\App\Http\Controllers\Api\LessonController::class, 'show']);
-    Route::post('/lessons/{lesson}/complete', [\App\Http\Controllers\Api\LessonController::class, 'complete']);
-    Route::delete('/lessons/{lesson}/complete', [\App\Http\Controllers\Api\LessonController::class, 'incomplete']);
+    Route::get('/lessons/{lesson}', [LessonController::class, 'show']);
+    Route::post('/lessons/{lesson}/complete', [LessonController::class, 'complete']);
+    Route::delete('/lessons/{lesson}/complete', [LessonController::class, 'incomplete']);
+
+    // Quizzes
+    Route::get('/lessons/{lesson}/quiz', [QuizController::class, 'showByLesson']);
+    Route::post('/quizzes/{quiz}/submit', [QuizController::class, 'submit']);
 });
 
 // Admin Routes
