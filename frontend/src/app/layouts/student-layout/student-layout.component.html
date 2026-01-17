@@ -3,13 +3,28 @@
     <div class="container">
       <div class="logo-area">
         <a routerLink="/" class="logo">
-          <!-- Placeholder for logo if image is missing, just use text or simple icon -->
           <div class="logo-icon">LMS</div>
           <span class="lms-name">Learning Platform</span>
         </a>
       </div>
-      
-      <button class="mobile-menu-btn" (click)="toggleMenu()" aria-label="Toggle navigation">
+
+      <div class="search-container desktop-only">
+        <form class="search-form" (ngSubmit)="submitSearch()">
+          <input
+            type="search"
+            class="search-input"
+            placeholder="Tìm khóa học, chủ đề..."
+            [(ngModel)]="searchQuery"
+            name="headerSearch"
+            aria-label="Tìm kiếm khóa học"
+          />
+          <button type="submit" class="search-button">
+            <span class="search-icon"></span>
+          </button>
+        </form>
+      </div>
+
+      <button class="mobile-menu-btn" [class.active]="isMenuOpen" (click)="toggleMenu()" aria-label="Toggle navigation">
         <span class="bar"></span>
         <span class="bar"></span>
         <span class="bar"></span>
@@ -17,15 +32,42 @@
 
       <nav class="nav-menu" [class.active]="isMenuOpen">
         <ul>
+          <li class="mobile-only mobile-search-item">
+            <form class="mobile-search-form" (ngSubmit)="submitSearch()">
+              <input
+                type="search"
+                class="mobile-search-input"
+                placeholder="Tìm khóa học..."
+                [(ngModel)]="searchQuery"
+                name="headerSearchMobile"
+                aria-label="Tìm kiếm khóa học"
+              />
+              <button type="submit" class="mobile-search-button">Tìm</button>
+            </form>
+          </li>
           <li><a routerLink="/home" routerLinkActive="active" (click)="isMenuOpen = false">Home</a></li>
           <li><a routerLink="/courses" routerLinkActive="active" (click)="isMenuOpen = false">Courses</a></li>
           <li *ngIf="user"><a routerLink="/my-learning" routerLinkActive="active" (click)="isMenuOpen = false">My Learning</a></li>
-          
-          <!-- Guest Links -->
-          <li *ngIf="!user" class="guest-links">
-            <a routerLink="/auth/login" class="nav-link" (click)="isMenuOpen = false">Login</a>
-            <a routerLink="/auth/register" class="btn-register" (click)="isMenuOpen = false">Register</a>
-          </li>
+
+          <ng-container *ngIf="!user">
+            <li>
+              <a
+                routerLink="/auth/login"
+                routerLinkActive="active"
+                (click)="isMenuOpen = false"
+              >
+                Login
+              </a>
+            </li>
+            <li>
+              <a
+                routerLink="/auth/register"
+                (click)="isMenuOpen = false"
+              >
+                Register
+              </a>
+            </li>
+          </ng-container>
 
           <!-- Desktop User Dropdown -->
           <li class="user-menu-item desktop-only" *ngIf="user">

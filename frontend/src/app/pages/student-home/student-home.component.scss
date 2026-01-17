@@ -1,12 +1,12 @@
 .student-home {
-  padding-bottom: 4rem;
+  padding-bottom: 0;
 }
 
 .hero-section {
-  background: linear-gradient(135deg, #3182ce 0%, #2b6cb0 100%);
+  background: radial-gradient(circle at top left, #60a5fa 0%, #2563eb 40%, #1d4ed8 80%);
   color: white;
   padding: 3rem 2rem;
-  border-radius: 12px;
+  border-radius: 1.25rem;
   margin-bottom: 3rem;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 
@@ -26,19 +26,21 @@
       max-width: 600px;
     }
 
-    .btn {
+    .btn-primary {
       display: inline-block;
       padding: 0.75rem 1.5rem;
-      background-color: white;
-      color: #2b6cb0;
+      background-color: #ffffff;
+      color: #1d4ed8;
       font-weight: 600;
-      border-radius: 6px;
+      border-radius: 0.75rem;
       text-decoration: none;
-      transition: background-color 0.2s, transform 0.2s;
+      box-shadow: 0 10px 15px -3px rgba(15, 23, 42, 0.4);
+      transition: background-color 0.2s, transform 0.2s, box-shadow 0.2s;
 
       &:hover {
-        background-color: #f7fafc;
+        background-color: #e5edff;
         transform: translateY(-2px);
+        box-shadow: 0 20px 25px -5px rgba(15, 23, 42, 0.35);
       }
     }
   }

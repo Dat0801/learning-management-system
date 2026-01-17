@@ -1,4 +1,4 @@
-<div class="courses-container">
+<div class="courses-container page-container">
   <h2>Available Courses</h2>
   
   <div *ngIf="errorMessage" class="alert alert-error">
@@ -13,8 +13,8 @@
     <p>No courses available at the moment.</p>
   </div>
 
-  <div class="course-grid">
-    <div class="course-card" *ngFor="let course of courses">
+  <div class="course-grid" *ngIf="filteredCourses.length > 0">
+    <div class="course-card" *ngFor="let course of filteredCourses">
       <div class="card-header">
         <h3>{{ course.title }}</h3>
         <span class="price">${{ course.price }}</span>
@@ -29,5 +29,9 @@
         <button class="btn btn-primary" (click)="enroll(course.id)">Enroll Now</button>
       </div>
     </div>
+  </div>
+
+  <div class="no-courses" *ngIf="courses.length > 0 && filteredCourses.length === 0">
+    <p>Không tìm thấy khóa học phù hợp với từ khóa "{{ searchTerm }}".</p>
   </div>
 </div>

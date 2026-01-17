@@ -1,5 +1,5 @@
 .profile-container {
-  padding: 2rem;
+  padding: 0;
   display: flex;
   justify-content: center;
   align-items: flex-start;
@@ -7,9 +7,9 @@
 }
 
 .profile-card {
-  background: white;
+  background: var(--card-bg);
   border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 15px -3px rgba(15, 23, 42, 0.1), 0 4px 6px -4px rgba(15, 23, 42, 0.05);
   width: 100%;
   max-width: 500px;
   padding: 2rem;
@@ -25,7 +25,7 @@
     width: 80px;
     height: 80px;
     border-radius: 50%;
-    background-color: #4a5568;
+    background-color: var(--primary-color);
     color: white;
     display: flex;
     align-items: center;
@@ -38,14 +38,14 @@
 
   h2 {
     margin: 0;
-    color: #2d3748;
+    color: var(--text-main);
     font-size: 1.5rem;
   }
 
   .role-badge {
     margin-top: 0.5rem;
-    background-color: #e2e8f0;
-    color: #4a5568;
+    background-color: var(--primary-soft);
+    color: var(--primary-color);
     padding: 0.25rem 0.75rem;
     border-radius: 9999px;
     font-size: 0.875rem;
@@ -65,14 +65,14 @@
 
     label {
       display: block;
-      color: #718096;
+      color: var(--text-muted);
       font-size: 0.875rem;
       margin-bottom: 0.25rem;
     }
 
     p {
       margin: 0;
-      color: #2d3748;
+      color: var(--text-main);
       font-weight: 500;
     }
   }
