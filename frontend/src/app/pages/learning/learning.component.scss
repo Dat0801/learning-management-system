@@ -2,7 +2,7 @@
   display: flex;
   height: calc(100vh - 64px); // Adjust based on navbar height if needed, assuming StudentLayout wraps this
   overflow: hidden;
-  background-color: #f5f5f5;
+  background-color: var(--bg-body);
 }
 
 .main-content {
@@ -23,22 +23,22 @@
   justify-content: space-between;
   align-items: center;
   background-color: white;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid var(--border-soft);
 
   .back-link {
     text-decoration: none;
-    color: #666;
+    color: var(--text-muted);
     font-weight: 500;
-    &:hover { color: #333; }
+    &:hover { color: var(--text-main); }
   }
 
   .toggle-sidebar-btn {
     background: none;
-    border: 1px solid #ccc;
+    border: 1px solid var(--border-soft);
     padding: 0.5rem 1rem;
     border-radius: 4px;
     cursor: pointer;
-    &:hover { background-color: #f0f0f0; }
+    &:hover { background-color: #f3f4f6; }
   }
 }
 
@@ -79,7 +79,7 @@
     h1 {
       margin: 0;
       font-size: 1.8rem;
-      color: #333;
+      color: var(--text-main);
       flex: 1;
     }
 
@@ -96,20 +96,20 @@
         transition: all 0.2s;
 
         &.btn-nav {
-          background-color: #f0f0f0;
-          color: #333;
+          background-color: #f3f4f6;
+          color: var(--text-main);
           &:disabled { opacity: 0.5; cursor: not-allowed; }
-          &:hover:not(:disabled) { background-color: #e0e0e0; }
+          &:hover:not(:disabled) { background-color: #e5e7eb; }
         }
 
         &.btn-complete {
-          background-color: #4caf50;
-          color: white;
+          background-color: var(--accent-green);
+          color: #ffffff;
           
           &.completed {
             background-color: #fff;
-            border: 1px solid #4caf50;
-            color: #4caf50;
+            border: 1px solid var(--accent-green);
+            color: var(--accent-green);
           }
           
           &:hover { opacity: 0.9; }
@@ -119,12 +119,12 @@
   }
 
   .lesson-description {
-    color: #555;
+    color: var(--text-muted);
     line-height: 1.6;
     h3 {
       font-size: 1.2rem;
       margin-bottom: 0.5rem;
-      color: #333;
+      color: var(--text-main);
     }
   }
 }
@@ -132,7 +132,7 @@
 .sidebar {
   width: 350px;
   background-color: white;
-  border-left: 1px solid #e0e0e0;
+  border-left: 1px solid var(--border-soft);
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -152,18 +152,18 @@
         justify-content: space-between;
         font-size: 0.9rem;
         margin-bottom: 0.5rem;
-        color: #666;
+        color: var(--text-muted);
       }
 
       .progress-bar {
         height: 6px;
-        background-color: #eee;
+        background-color: #e5e7eb;
         border-radius: 3px;
         overflow: hidden;
 
         .fill {
           height: 100%;
-          background-color: #4caf50;
+          background-color: var(--accent-green);
           transition: width 0.3s ease;
         }
       }
@@ -177,21 +177,21 @@
     .lesson-item {
       display: flex;
       padding: 1rem 1.5rem;
-      border-bottom: 1px solid #f5f5f5;
+      border-bottom: 1px solid #f3f4f6;
       cursor: pointer;
       transition: background-color 0.2s;
 
       &:hover {
-        background-color: #f9f9f9;
+        background-color: #f9fafb;
       }
 
       &.active {
-        background-color: #e8eaf6;
-        border-left: 4px solid #3f51b5;
+        background-color: #e5edff;
+        border-left: 4px solid var(--primary-color);
         
         .lesson-info .lesson-title {
           font-weight: 600;
-          color: #3f51b5;
+          color: var(--primary-color);
         }
       }
 
@@ -204,7 +204,7 @@
 
         .check { color: #4caf50; font-weight: bold; }
         .lock { color: #ccc; font-size: 0.8rem; }
-        .play { color: #3f51b5; font-size: 0.8rem; }
+        .play { color: var(--primary-color); font-size: 0.8rem; }
       }
 
       .lesson-info {
@@ -213,14 +213,14 @@
         
         .lesson-number {
           font-size: 0.75rem;
-          color: #888;
+          color: var(--text-muted);
           text-transform: uppercase;
           margin-bottom: 0.2rem;
         }
 
         .lesson-title {
           font-size: 0.95rem;
-          color: #333;
+          color: var(--text-main);
           line-height: 1.4;
         }
       }
@@ -238,7 +238,7 @@
   
   .spinner {
     border: 4px solid #f3f3f3;
-    border-top: 4px solid #3f51b5;
+    border-top: 4px solid var(--primary-color);
     border-radius: 50%;
     width: 40px;
     height: 40px;
