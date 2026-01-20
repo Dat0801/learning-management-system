@@ -60,17 +60,20 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
 
     // User Management
     Route::get('/users', [AdminController::class, 'getAllUsers']);
+    Route::post('/users', [AdminController::class, 'createUser']);
     Route::get('/users/{user}', [AdminController::class, 'getUserDetail']);
     Route::put('/users/{user}', [AdminController::class, 'updateUser']);
     Route::delete('/users/{user}', [AdminController::class, 'deleteUser']);
 
     // Course Management
     Route::get('/courses', [AdminController::class, 'getAllCoursesAdmin']);
+    Route::post('/courses', [AdminController::class, 'createCourseAdmin']);
     Route::get('/courses/{course}', [AdminController::class, 'getCourseDetail']);
     Route::put('/courses/{course}', [AdminController::class, 'updateCourseAdmin']);
     Route::delete('/courses/{course}', [AdminController::class, 'deleteCourseAdmin']);
 
     // Enrollment Management
     Route::get('/enrollments', [AdminController::class, 'getAllEnrollments']);
+    Route::post('/enrollments', [AdminController::class, 'createEnrollment']);
     Route::delete('/enrollments/{enrollment}', [AdminController::class, 'deleteEnrollment']);
 });

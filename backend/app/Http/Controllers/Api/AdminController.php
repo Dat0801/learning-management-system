@@ -49,6 +49,25 @@ class AdminController extends Controller
         return response()->json($user);
     }
 
+    public function createUser(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|string|min:8',
+            'role' => 'required|in:student,instructor,admin',
+        ]);
+
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'role' => $request->role,
+        ]);
+
+        return response()->json($user, 201);
+    }
+
     public function updateUser(Request $request, $userId)
     {
         $user = User::findOrFail($userId);
@@ -103,6 +122,33 @@ class AdminController extends Controller
         return response()->json($course);
     }
 
+    public function createCourseAdmin(Request $request)
+    {
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'required|string',
+            'price' => 'required|numeric|min:0',
+            'instructor_id' => 'required|exists:users,id',
+            'status' => 'in:draft,published,archived',
+        ]);
+
+        // Verify that the assigned user is actually an instructor or admin
+        $instructor = User::findOrFail($request->instructor_id);
+        if (!in_array($instructor->role, ['instructor', 'admin'])) {
+            return response()->json(['message' => 'Selected user must be an instructor or admin'], 422);
+        }
+
+        $course = Course::create([
+            'title' => $request->title,
+            'description' => $request->description,
+            'price' => $request->price,
+            'instructor_id' => $request->instructor_id,
+            'status' => $request->status ?? 'draft',
+        ]);
+
+        return response()->json($course, 201);
+    }
+
     public function updateCourseAdmin(Request $request, $courseId)
     {
         $course = Course::findOrFail($courseId);
@@ -136,6 +182,31 @@ class AdminController extends Controller
 
         $enrollments = $query->paginate($request->get('per_page', 15));
         return response()->json($enrollments);
+    }
+
+    public function createEnrollment(Request $request)
+    {
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'course_id' => 'required|exists:courses,id',
+        ]);
+
+        // Check if already enrolled
+        $exists = Enrollment::where('user_id', $request->user_id)
+            ->where('course_id', $request->course_id)
+            ->exists();
+
+        if ($exists) {
+            return response()->json(['message' => 'User is already enrolled in this course'], 422);
+        }
+
+        $enrollment = Enrollment::create([
+            'user_id' => $request->user_id,
+            'course_id' => $request->course_id,
+            'enrolled_at' => now(),
+        ]);
+
+        return response()->json($enrollment, 201);
     }
 
     public function deleteEnrollment($enrollmentId)
