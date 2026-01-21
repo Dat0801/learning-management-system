@@ -18,9 +18,10 @@ class CourseController extends Controller
         $this->courseService = $courseService;
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $courses = $this->courseService->getAllCourses();
+        $filters = $request->only(['category_slug', 'search']);
+        $courses = $this->courseService->getAllCourses($filters);
         return response()->json([
             'success' => true,
             'data' => CourseResource::collection($courses),

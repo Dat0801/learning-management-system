@@ -46,6 +46,7 @@
             </form>
           </li>
           <li><a routerLink="/home" routerLinkActive="active" (click)="isMenuOpen = false">Home</a></li>
+          <li><a routerLink="/browse" routerLinkActive="active" (click)="isMenuOpen = false">Browse</a></li>
           <li><a routerLink="/courses" routerLinkActive="active" (click)="isMenuOpen = false">Courses</a></li>
           <li *ngIf="user"><a routerLink="/my-learning" routerLinkActive="active" (click)="isMenuOpen = false">My Learning</a></li>
 
@@ -77,12 +78,14 @@
             </div>
             
             <div class="dropdown-menu" *ngIf="isUserDropdownOpen">
+              <a *ngIf="user?.role === 'admin'" routerLink="/admin/dashboard" (click)="isUserDropdownOpen = false; isMenuOpen = false">Admin Dashboard</a>
               <a routerLink="/profile" (click)="isUserDropdownOpen = false; isMenuOpen = false">Profile</a>
               <button (click)="logout()" class="logout-btn">Logout</button>
             </div>
           </li>
 
           <!-- Mobile User Links -->
+          <li class="mobile-only" *ngIf="user?.role === 'admin'"><a routerLink="/admin/dashboard" routerLinkActive="active" (click)="isMenuOpen = false">Admin Dashboard</a></li>
           <li class="mobile-only"><a routerLink="/profile" routerLinkActive="active" (click)="isMenuOpen = false">Profile</a></li>
           <li class="mobile-only"><button (click)="logout()" class="mobile-logout-btn">Logout</button></li>
         </ul>

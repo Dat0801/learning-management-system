@@ -4,7 +4,7 @@ namespace App\Repositories\Interfaces;
 
 interface CourseRepositoryInterface
 {
-    public function all();
+    public function all(array $filters = []);
     public function getRecommended($limit = 3);
     public function getPopular($limit = 3);
     public function find($id);

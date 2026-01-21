@@ -11,7 +11,7 @@
     </div>
     <div class="navbar-right">
       <div class="user-info" *ngIf="currentUser$ | async as user">
-        <span class="username">{{ user.name }}</span>
+        <a routerLink="/profile" class="username" style="color: white; text-decoration: none; margin-right: 15px;">{{ user.name }}</a>
       </div>
       <button class="logout-btn" (click)="logout()">Logout</button>
     </div>
@@ -22,6 +22,12 @@
     <!-- Sidebar -->
     <aside class="sidebar" [class.collapsed]="!sidebarOpen">
       <ul class="menu">
+        <li>
+          <a routerLink="/home">
+            <i class="icon">🏠</i>
+            <span>Back to Home</span>
+          </a>
+        </li>
         <li>
           <a routerLink="/admin/dashboard" routerLinkActive="active">
             <i class="icon">📊</i>
@@ -38,6 +44,12 @@
           <a routerLink="/admin/courses" routerLinkActive="active">
             <i class="icon">📚</i>
             <span>Courses</span>
+          </a>
+        </li>
+        <li>
+          <a routerLink="/admin/categories" routerLinkActive="active">
+            <i class="icon">📂</i>
+            <span>Categories</span>
           </a>
         </li>
         <li>

@@ -20,8 +20,9 @@ export class AuthService {
   register(data: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/register`, data).pipe(
         tap((res: any) => {
-          this.setToken(res.access_token);
-          this.setUser(res.user);
+          const responseData = res.data || res;
+          this.setToken(responseData.access_token);
+          this.setUser(responseData.user);
         })
     );
   }
@@ -29,8 +30,9 @@ export class AuthService {
   login(data: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/login`, data).pipe(
       tap((res: any) => {
-        this.setToken(res.access_token);
-        this.setUser(res.user);
+        const responseData = res.data || res;
+        this.setToken(responseData.access_token);
+        this.setUser(responseData.user);
       })
     );
   }
@@ -48,7 +50,11 @@ export class AuthService {
   }
 
   private setUser(user: any) {
-    localStorage.setItem('user', JSON.stringify(user));
+    if (user) {
+      localStorage.setItem('user', JSON.stringify(user));
+    } else {
+      localStorage.removeItem('user');
+    }
     this.userSubject.next(user);
   }
 
@@ -58,7 +64,16 @@ export class AuthService {
 
   private getUserFromStorage(): any {
     const userStr = localStorage.getItem('user');
-    return userStr ? JSON.parse(userStr) : null;
+    if (!userStr || userStr === 'undefined') {
+      return null;
+    }
+    try {
+      return JSON.parse(userStr);
+    } catch (error) {
+      console.error('Error parsing user from storage:', error);
+      localStorage.removeItem('user');
+      return null;
+    }
   }
 
   getUser(): any {

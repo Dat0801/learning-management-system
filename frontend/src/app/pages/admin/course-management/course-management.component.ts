@@ -3,16 +3,18 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdminService } from '../../../core/services/admin.service';
 import { Observable } from 'rxjs';
+import { CurriculumManagementComponent } from './curriculum-management/curriculum-management.component';
 
 @Component({
   selector: 'app-course-management',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, CurriculumManagementComponent],
   templateUrl: './course-management.component.html',
   styleUrl: './course-management.component.scss'
 })
 export class CourseManagementComponent implements OnInit {
   courses$: Observable<any> | null = null;
+  categories: any[] = [];
   searchTerm = '';
   selectedStatus = '';
   editingCourse: any = null;
@@ -24,6 +26,13 @@ export class CourseManagementComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadCourses();
+    this.loadCategories();
+  }
+
+  loadCategories(): void {
+    this.adminService.getAllCategories().subscribe(data => {
+      this.categories = data;
+    });
   }
 
   loadCourses(): void {
@@ -34,6 +43,25 @@ export class CourseManagementComponent implements OnInit {
     this.loadCourses();
   }
 
+  openCreateCourseModal(): void {
+    this.editingCourse = {
+      title: '',
+      description: '',
+      price: 0,
+      status: 'draft',
+      category_id: null,
+      instructor_id: null // Will be handled by backend if current user, or need UI to select
+    };
+    // For now, assume current admin is the instructor or backend assigns it.
+    // However, backend createCourseAdmin requires instructor_id.
+    // We might need to fetch instructors or assign current user.
+    // Let's assume we assign the current logged-in user for now if they are admin/instructor.
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    this.editingCourse.instructor_id = user.id;
+
+    this.showEditForm = true;
+  }
+
   editCourse(course: any): void {
     this.editingCourse = { ...course };
     this.showEditForm = true;
@@ -41,12 +69,21 @@ export class CourseManagementComponent implements OnInit {
 
   saveCourse(): void {
     if (this.editingCourse) {
-      this.adminService.updateCourseAdmin(this.editingCourse.id, this.editingCourse)
-        .subscribe(() => {
+      const request$ = this.editingCourse.id
+        ? this.adminService.updateCourseAdmin(this.editingCourse.id, this.editingCourse)
+        : this.adminService.createCourseAdmin(this.editingCourse);
+
+      request$.subscribe({
+        next: () => {
           this.showEditForm = false;
           this.loadCourses();
-          alert('Course updated successfully');
-        });
+          alert(this.editingCourse.id ? 'Course updated successfully' : 'Course created successfully');
+        },
+        error: (err) => {
+          console.error('Error saving course:', err);
+          alert('Failed to save course: ' + (err.error?.message || 'Unknown error'));
+        }
+      });
     }
   }
 

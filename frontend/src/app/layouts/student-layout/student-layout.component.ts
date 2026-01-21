@@ -46,13 +46,13 @@ export class StudentLayoutComponent implements OnInit, OnDestroy {
 
   submitSearch() {
     const term = this.searchQuery.trim();
-    const extras: any = {};
-
+    
     if (term) {
-      extras.queryParams = { q: term };
+      this.router.navigate(['/browse'], { queryParams: { search: term } });
+    } else {
+      this.router.navigate(['/browse']);
     }
 
-    this.router.navigate(['/courses'], extras);
     this.isMenuOpen = false;
     this.isUserDropdownOpen = false;
   }

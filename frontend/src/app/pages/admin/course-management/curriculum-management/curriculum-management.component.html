@@ -1,0 +1,68 @@
+<div class="curriculum-container">
+  <div class="header">
+    <h3>Curriculum</h3>
+    <button class="btn-add" (click)="startAddLesson()" *ngIf="!isEditing">+ Add Lesson</button>
+  </div>
+
+  <div *ngIf="isLoading">Loading lessons...</div>
+
+  <div class="lesson-list" *ngIf="!isEditing && !isLoading">
+    <div class="lesson-item" *ngFor="let lesson of lessons">
+      <div class="lesson-info">
+        <span class="order">#{{ lesson.order }}</span>
+        <div class="details">
+          <span class="title">{{ lesson.title }}</span>
+          <span class="meta" *ngIf="lesson.duration">{{ lesson.duration }}</span>
+        </div>
+        <span class="badge preview" *ngIf="lesson.is_preview">Preview</span>
+      </div>
+      <div class="actions">
+        <button (click)="startEditLesson(lesson)" class="btn-sm">Edit</button>
+        <button (click)="deleteLesson(lesson)" class="btn-sm btn-danger">Delete</button>
+      </div>
+    </div>
+    <div *ngIf="lessons.length === 0" class="empty-state">No lessons yet. Add one to start.</div>
+  </div>
+
+  <div class="edit-form" *ngIf="isEditing">
+    <h4>{{ editingLesson.id ? 'Edit Lesson' : 'New Lesson' }}</h4>
+    
+    <div class="form-group">
+      <label>Title</label>
+      <input [(ngModel)]="editingLesson.title" placeholder="Lesson Title" class="form-control">
+    </div>
+
+    <div class="form-group">
+      <label>Content (Description)</label>
+      <textarea [(ngModel)]="editingLesson.content" rows="3" class="form-control"></textarea>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Video URL</label>
+        <input [(ngModel)]="editingLesson.video_url" placeholder="https://..." class="form-control">
+      </div>
+      <div class="form-group">
+        <label>Duration</label>
+        <input [(ngModel)]="editingLesson.duration" placeholder="e.g. 10:30" class="form-control">
+      </div>
+    </div>
+
+    <div class="form-group checkbox">
+      <label>
+        <input type="checkbox" [(ngModel)]="editingLesson.is_preview">
+        Allow Preview (Free)
+      </label>
+    </div>
+
+    <div class="form-group">
+      <label>Order</label>
+      <input type="number" [(ngModel)]="editingLesson.order" class="form-control">
+    </div>
+
+    <div class="form-actions">
+      <button (click)="saveLesson()" class="btn-primary">Save Lesson</button>
+      <button (click)="cancelEdit()" class="btn-secondary">Cancel</button>
+    </div>
+  </div>
+</div>

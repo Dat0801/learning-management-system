@@ -16,6 +16,7 @@
       <option value="published">Published</option>
       <option value="archived">Archived</option>
     </select>
+    <button class="btn-add" (click)="openCreateCourseModal()">Add Course</button>
   </div>
 
   <!-- Courses Table -->
@@ -36,6 +37,7 @@
           <td>{{ course.id }}</td>
           <td>{{ course.title }}</td>
           <td>{{ course.instructor?.name || 'N/A' }}</td>
+          <td>{{ course.category?.name || 'Uncategorized' }}</td>
           <td>${{ course.price || 0 }}</td>
           <td>
             <span class="status-badge" [ngClass]="'status-' + (course.status || 'draft')">
@@ -54,7 +56,7 @@
   <!-- Edit Form -->
   <div class="modal" *ngIf="showEditForm">
     <div class="modal-content">
-      <h2>Edit Course</h2>
+      <h2>{{ editingCourse.id ? 'Edit Course' : 'Create Course' }}</h2>
       <form *ngIf="editingCourse">
         <div class="form-group">
           <label>Title</label>
@@ -69,11 +71,25 @@
           <input type="number" [(ngModel)]="editingCourse.price" name="price" min="0" />
         </div>
         <div class="form-group">
+          <label>Category</label>
+          <select [(ngModel)]="editingCourse.category_id" name="category_id">
+            <option [ngValue]="null">Select Category</option>
+            <option *ngFor="let cat of categories" [ngValue]="cat.id">{{ cat.name }}</option>
+          </select>
+        </div>
+        <div class="form-group">
           <label>Status</label>
           <select [(ngModel)]="editingCourse.status" name="status">
             <option *ngFor="let status of statuses" [value]="status">{{ status }}</option>
           </select>
         </div>
+
+        <!-- Curriculum Section -->
+        <div class="curriculum-section" *ngIf="editingCourse.id">
+          <hr style="margin: 1.5rem 0; border: 0; border-top: 1px solid #eee;">
+          <app-curriculum-management [courseId]="editingCourse.id"></app-curriculum-management>
+        </div>
+
         <div class="form-actions">
           <button type="button" class="btn-save" (click)="saveCourse()">Save</button>
           <button type="button" class="btn-cancel" (click)="cancelEdit()">Cancel</button>
