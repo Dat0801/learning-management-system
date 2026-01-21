@@ -158,6 +158,7 @@ class AdminController extends Controller
             'description' => 'nullable|string',
             'price' => 'numeric|min:0',
             'status' => 'in:draft,published,archived',
+            'category_id' => 'nullable|exists:categories,id',
         ]);
 
         $course->update($request->all());

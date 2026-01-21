@@ -13,7 +13,15 @@ class Lesson extends Model
         'course_id',
         'title',
         'content',
+        'video_url',
+        'duration',
+        'is_preview',
         'order',
+    ];
+
+    protected $casts = [
+        'is_preview' => 'boolean',
+        'order' => 'integer',
     ];
 
     public function course()

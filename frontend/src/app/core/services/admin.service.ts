@@ -1,18 +1,36 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AdminService {
-  private apiUrl = '/api/admin';
+  private apiUrl = `${environment.apiUrl}/admin`;
 
   constructor(private http: HttpClient) {}
 
   // Dashboard
   getDashboardStats(): Observable<any> {
     return this.http.get(`${this.apiUrl}/dashboard/stats`);
+  }
+
+  // Categories
+  getAllCategories(): Observable<any> {
+    return this.http.get(`${environment.apiUrl}/categories`);
+  }
+
+  createCategory(data: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/categories`, data);
+  }
+
+  updateCategory(categoryId: number, data: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/categories/${categoryId}`, data);
+  }
+
+  deleteCategory(categoryId: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/categories/${categoryId}`);
   }
 
   // Users
@@ -28,6 +46,10 @@ export class AdminService {
 
   getUserDetail(userId: number): Observable<any> {
     return this.http.get(`${this.apiUrl}/users/${userId}`);
+  }
+
+  createUser(data: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/users`, data);
   }
 
   updateUser(userId: number, data: any): Observable<any> {
@@ -53,6 +75,10 @@ export class AdminService {
     return this.http.get(`${this.apiUrl}/courses/${courseId}`);
   }
 
+  createCourseAdmin(data: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/courses`, data);
+  }
+
   updateCourseAdmin(courseId: number, data: any): Observable<any> {
     return this.http.put(`${this.apiUrl}/courses/${courseId}`, data);
   }
@@ -73,5 +99,26 @@ export class AdminService {
 
   deleteEnrollment(enrollmentId: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/enrollments/${enrollmentId}`);
+  }
+
+  createEnrollment(userId: number, courseId: number): Observable<any> {
+    return this.http.post(`${this.apiUrl}/enrollments`, { user_id: userId, course_id: courseId });
+  }
+
+  // Lessons
+  getLessons(courseId: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/courses/${courseId}/lessons`);
+  }
+
+  createLesson(courseId: number, data: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/courses/${courseId}/lessons`, data);
+  }
+
+  updateLesson(courseId: number, lessonId: number, data: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/courses/${courseId}/lessons/${lessonId}`, data);
+  }
+
+  deleteLesson(courseId: number, lessonId: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/courses/${courseId}/lessons/${lessonId}`);
   }
 }

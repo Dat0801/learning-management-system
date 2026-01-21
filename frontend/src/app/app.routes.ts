@@ -19,6 +19,10 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/student-home/student-home.component').then(m => m.StudentHomeComponent)
       },
       {
+        path: 'browse',
+        loadComponent: () => import('./pages/browse-categories/browse-categories.component').then(m => m.BrowseCategoriesComponent)
+      },
+      {
         path: 'courses',
         loadChildren: () => import('./pages/courses/courses.module').then(m => m.CoursesModule)
       },
@@ -59,6 +63,10 @@ export const routes: Routes = [
       {
         path: 'enrollments',
         loadComponent: () => import('./pages/admin/enrollment-management/enrollment-management.component').then(m => m.EnrollmentManagementComponent)
+      },
+      {
+        path: 'categories',
+        loadComponent: () => import('./pages/admin/category-management/category-management.component').then(m => m.CategoryManagementComponent)
       },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]

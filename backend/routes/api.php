@@ -8,6 +8,8 @@ use App\Http\Controllers\Api\EnrollmentController;
 use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\QuizController;
 use App\Http\Controllers\Api\LessonController;
+use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\AdminLessonController;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,6 +18,8 @@ use App\Http\Controllers\Api\LessonController;
 */
 
 // Public routes
+Route::get('/categories', [CategoryController::class, 'index']);
+Route::get('/categories/{category}', [CategoryController::class, 'show']);
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
@@ -58,6 +62,11 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
     // Dashboard
     Route::get('/dashboard/stats', [AdminController::class, 'getDashboardStats']);
 
+    // Category Management
+    Route::post('/categories', [CategoryController::class, 'store']);
+    Route::put('/categories/{category}', [CategoryController::class, 'update']);
+    Route::delete('/categories/{category}', [CategoryController::class, 'destroy']);
+
     // User Management
     Route::get('/users', [AdminController::class, 'getAllUsers']);
     Route::post('/users', [AdminController::class, 'createUser']);
@@ -76,4 +85,10 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
     Route::get('/enrollments', [AdminController::class, 'getAllEnrollments']);
     Route::post('/enrollments', [AdminController::class, 'createEnrollment']);
     Route::delete('/enrollments/{enrollment}', [AdminController::class, 'deleteEnrollment']);
+
+    // Lesson Management (Nested under courses)
+    Route::get('/courses/{course}/lessons', [AdminLessonController::class, 'index']);
+    Route::post('/courses/{course}/lessons', [AdminLessonController::class, 'store']);
+    Route::put('/courses/{course}/lessons/{lesson}', [AdminLessonController::class, 'update']);
+    Route::delete('/courses/{course}/lessons/{lesson}', [AdminLessonController::class, 'destroy']);
 });

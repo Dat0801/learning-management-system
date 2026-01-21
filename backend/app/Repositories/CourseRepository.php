@@ -7,13 +7,24 @@ use App\Repositories\Interfaces\CourseRepositoryInterface;
 
 class CourseRepository implements CourseRepositoryInterface
 {
-    public function all()
+    public function all(array $filters = [])
     {
-        return Course::with('instructor')
+        $query = Course::with('instructor')
             ->withExists(['enrollments as is_enrolled' => function ($query) {
                 $query->where('user_id', auth()->id());
-            }])
-            ->get();
+            }]);
+
+        if (isset($filters['category_slug'])) {
+            $query->whereHas('category', function ($q) use ($filters) {
+                $q->where('slug', $filters['category_slug']);
+            });
+        }
+
+        if (isset($filters['search'])) {
+            $query->where('title', 'like', '%' . $filters['search'] . '%');
+        }
+
+        return $query->get();
     }
 
     public function getRecommended($limit = 3)

@@ -41,6 +41,7 @@
             </span>
           </td>
           <td class="actions">
+            <button class="btn-enroll" (click)="openEnrollModal(user)">Enroll</button>
             <button class="btn-edit" (click)="editUser(user)">Edit</button>
             <button class="btn-delete" (click)="deleteUser(user.id)">Delete</button>
           </td>
@@ -67,6 +68,16 @@
           <select [(ngModel)]="editingUser.role" name="role">
             <option *ngFor="let role of roles" [value]="role">{{ role }}</option>
           </select>
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input 
+            type="password" 
+            [(ngModel)]="editingUser.password" 
+            name="password" 
+            [placeholder]="editingUser.id ? 'Leave blank to keep current' : 'Enter password'"
+            [required]="!editingUser.id"
+          />
         </div>
         <div class="form-actions">
           <button type="button" class="btn-save" (click)="saveUser()">Save</button>

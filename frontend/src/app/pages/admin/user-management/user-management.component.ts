@@ -17,6 +17,10 @@ export class UserManagementComponent implements OnInit {
   selectedRole = '';
   editingUser: any = null;
   showEditForm = false;
+  showEnrollModal = false;
+  enrollingUser: any = null;
+  courses$: Observable<any> | null = null;
+  selectedCourseId: number | null = null;
 
   roles = ['student', 'instructor', 'admin'];
 
@@ -34,19 +38,38 @@ export class UserManagementComponent implements OnInit {
     this.loadUsers();
   }
 
+  openCreateUserModal(): void {
+    this.editingUser = {
+      name: '',
+      email: '',
+      password: '',
+      role: 'student'
+    };
+    this.showEditForm = true;
+  }
+
   editUser(user: any): void {
-    this.editingUser = { ...user };
+    this.editingUser = { ...user, password: '' }; // Initialize password as empty
     this.showEditForm = true;
   }
 
   saveUser(): void {
     if (this.editingUser) {
-      this.adminService.updateUser(this.editingUser.id, this.editingUser)
-        .subscribe(() => {
+      const request$ = this.editingUser.id
+        ? this.adminService.updateUser(this.editingUser.id, this.editingUser)
+        : this.adminService.createUser(this.editingUser);
+
+      request$.subscribe({
+        next: () => {
           this.showEditForm = false;
           this.loadUsers();
-          alert('User updated successfully');
-        });
+          alert(this.editingUser.id ? 'User updated successfully' : 'User created successfully');
+        },
+        error: (err) => {
+          console.error('Error saving user:', err);
+          alert('Failed to save user');
+        }
+      });
     }
   }
 
@@ -57,6 +80,34 @@ export class UserManagementComponent implements OnInit {
         alert('User deleted successfully');
       });
     }
+  }
+
+  openEnrollModal(user: any): void {
+    this.enrollingUser = user;
+    this.selectedCourseId = null;
+    this.courses$ = this.adminService.getAllCoursesAdmin('', 'published');
+    this.showEnrollModal = true;
+  }
+
+  enrollUser(): void {
+    if (this.enrollingUser && this.selectedCourseId) {
+      this.adminService.createEnrollment(this.enrollingUser.id, this.selectedCourseId).subscribe({
+        next: () => {
+          this.showEnrollModal = false;
+          alert('User enrolled successfully');
+        },
+        error: (err) => {
+          console.error('Error enrolling user:', err);
+          alert('Failed to enroll user: ' + (err.error?.message || 'Unknown error'));
+        }
+      });
+    }
+  }
+
+  cancelEnroll(): void {
+    this.showEnrollModal = false;
+    this.enrollingUser = null;
+    this.selectedCourseId = null;
   }
 
   cancelEdit(): void {

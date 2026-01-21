@@ -13,9 +13,9 @@ class CourseService
         $this->courseRepository = $courseRepository;
     }
 
-    public function getAllCourses()
+    public function getAllCourses(array $filters = [])
     {
-        return $this->courseRepository->all();
+        return $this->courseRepository->all($filters);
     }
 
     public function getRecommendedCourses($limit = 3)

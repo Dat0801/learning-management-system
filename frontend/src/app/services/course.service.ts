@@ -11,8 +11,16 @@ export class CourseService {
 
   constructor(private http: HttpClient) { }
 
-  getCourses(): Observable<any[]> {
-    return this.http.get<any[]>(this.apiUrl);
+  getCourses(filters: any = {}): Observable<any[]> {
+    return this.http.get<any[]>(this.apiUrl, { params: filters });
+  }
+
+  getCategories(): Observable<any[]> {
+    return this.http.get<any[]>(`${environment.apiUrl}/categories`);
+  }
+
+  getCategory(slug: string): Observable<any> {
+    return this.http.get<any>(`${environment.apiUrl}/categories/${slug}`);
   }
 
   getRecommendedCourses(): Observable<any[]> {
