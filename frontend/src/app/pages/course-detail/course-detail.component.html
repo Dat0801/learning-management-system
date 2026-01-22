@@ -1,4 +1,4 @@
-<div class="course-detail-container page-container" *ngIf="course; else loadingTpl">
+<div class="course-detail-container" *ngIf="course; else loadingTpl">
   <!-- Hero Section -->
   <header class="course-header">
     <div class="header-content">
@@ -17,6 +17,10 @@
         </button>
         <button *ngIf="course.is_enrolled" class="btn-secondary">
           Continue Learning
+        </button>
+        
+        <button class="btn-wishlist" (click)="toggleWishlist()" [title]="isInWishlist ? 'Remove from wishlist' : 'Add to wishlist'">
+          {{ isInWishlist ? '♥' : '♡' }}
         </button>
       </div>
     </div>
@@ -44,11 +48,13 @@
           <div class="status-icon">
             <span *ngIf="getLessonStatus(lesson) === 'completed'">✓</span>
             <span *ngIf="getLessonStatus(lesson) === 'current'">▶</span>
+            <span *ngIf="getLessonStatus(lesson) === 'preview'">👁</span>
             <span *ngIf="getLessonStatus(lesson) === 'locked'">🔒</span>
           </div>
           <div class="lesson-info">
             <h3>{{ lesson.title }}</h3>
             <!-- <p class="duration">10:00</p> -->
+            <span *ngIf="lesson.is_preview && !course.is_enrolled" class="text-xs text-blue-500 ml-2">(Preview)</span>
           </div>
           <div class="lesson-action">
             <button 
@@ -57,10 +63,86 @@
               [routerLink]="['/learning', course.id]"
               [queryParams]="{lesson: lesson.id}"
             >
-              {{ getLessonStatus(lesson) === 'completed' ? 'Review' : 'Start' }}
+              {{ getLessonStatus(lesson) === 'completed' ? 'Review' : (getLessonStatus(lesson) === 'preview' ? 'Preview' : 'Start') }}
             </button>
           </div>
         </div>
+      </div>
+    </section>
+
+    <!-- Reviews Section -->
+    <section class="reviews-section mt-8">
+      <h2 class="text-2xl font-bold mb-4">Reviews & Ratings</h2>
+      
+      <!-- Reviews List -->
+      <div class="reviews-list space-y-4">
+        <div *ngIf="reviews.length === 0" class="text-gray-500">
+          No reviews yet. Be the first to review!
+        </div>
+
+        <div *ngFor="let review of reviews" class="review-item bg-white p-4 rounded shadow-sm border">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-2">
+              <div class="font-bold">{{ review.user?.name || 'User' }}</div>
+              <div class="text-yellow-500">
+                <span *ngFor="let i of [1,2,3,4,5]">
+                  {{ i <= review.rating ? '★' : '☆' }}
+                </span>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <div class="text-sm text-gray-500">{{ review.created_at | date }}</div>
+              <button 
+                *ngIf="currentUser && currentUser.id === review.user_id"
+                (click)="deleteReview(review.id)"
+                class="text-red-500 hover:text-red-700 text-sm font-medium"
+                title="Delete your review"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+          <p class="text-gray-700">{{ review.comment }}</p>
+        </div>
+      </div>
+
+      <!-- Write Review Form -->
+      <div *ngIf="course.is_enrolled && !userHasReviewed" class="write-review mt-8 p-6 bg-gray-50 rounded-lg border">
+        <h3 class="text-xl font-semibold mb-4">Write a Review</h3>
+        <form (ngSubmit)="submitReview()">
+          <div class="mb-4">
+            <label class="block mb-2 font-medium">Rating</label>
+            <div class="flex gap-2">
+              <button 
+                type="button" 
+                *ngFor="let i of [1,2,3,4,5]" 
+                (click)="newReviewRating = i"
+                class="text-2xl focus:outline-none"
+                [class.text-yellow-500]="i <= newReviewRating"
+                [class.text-gray-300]="i > newReviewRating"
+              >
+                ★
+              </button>
+            </div>
+          </div>
+          <div class="mb-4">
+            <label class="block mb-2 font-medium">Comment</label>
+            <textarea 
+              [(ngModel)]="newReviewComment" 
+              name="comment"
+              rows="3" 
+              class="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-blue-500"
+              placeholder="Share your experience..."
+            ></textarea>
+          </div>
+          <button 
+            type="submit" 
+            [disabled]="submittingReview"
+            class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+          >
+            {{ submittingReview ? 'Submitting...' : 'Submit Review' }}
+          </button>
+        </form>
       </div>
     </section>
   </div>

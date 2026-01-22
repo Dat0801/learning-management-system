@@ -1,7 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { CourseService } from '../../services/course.service';
+import { ToastService } from '../../services/toast.service';
 import { Course, Lesson } from '../../models/course.model';
 import { switchMap, tap } from 'rxjs/operators';
 import { of } from 'rxjs';
@@ -9,7 +11,7 @@ import { of } from 'rxjs';
 @Component({
   selector: 'app-learning',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, FormsModule],
   templateUrl: './learning.component.html',
   styleUrls: ['./learning.component.scss']
 })
@@ -20,10 +22,18 @@ export class LearningComponent implements OnInit {
   progress = 0;
   sidebarOpen = true;
 
+  // Quiz State
+  quiz: any = null;
+  quizLoading = false;
+  quizSubmitted = false;
+  quizResult: any = null;
+  userAnswers: { [key: number]: number } = {};
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private courseService: CourseService
+    private courseService: CourseService,
+    private toastService: ToastService
   ) {}
 
   ngOnInit(): void {
@@ -36,7 +46,8 @@ export class LearningComponent implements OnInit {
         return of(null);
       })
     ).subscribe({
-      next: (course) => {
+      next: (response: any) => {
+        const course = response.data || response;
         if (!course) {
           this.router.navigate(['/home']);
           return;
@@ -47,14 +58,26 @@ export class LearningComponent implements OnInit {
         // Determine lesson to show
         const lessonId = this.route.snapshot.queryParamMap.get('lesson');
         if (lessonId) {
-          this.currentLesson = this.course?.lessons?.find(l => l.id === +lessonId) || null;
+          const lesson = this.course?.lessons?.find(l => l.id === +lessonId);
+          if (lesson) {
+             this.selectLesson(lesson);
+          }
         } 
         
         if (!this.currentLesson && this.course?.lessons?.length) {
             // Default to first incomplete or first lesson
-            this.currentLesson = this.course.lessons.find(l => !l.is_completed) || this.course.lessons[0];
-            // Update URL without reload
-            this.updateUrl();
+            // If not enrolled, default to first preview lesson
+            let defaultLesson: Lesson | undefined;
+            
+            if (this.course.is_enrolled) {
+                defaultLesson = this.course.lessons.find(l => !l.is_completed) || this.course.lessons[0];
+            } else {
+                defaultLesson = this.course.lessons.find(l => l.is_preview);
+            }
+            
+            if (defaultLesson) {
+                this.selectLesson(defaultLesson);
+            }
         }
 
         this.loading = false;
@@ -66,10 +89,64 @@ export class LearningComponent implements OnInit {
     });
   }
 
+  isLessonAccessible(lesson: Lesson): boolean {
+    if (this.course?.is_enrolled) return true;
+    return !!lesson.is_preview;
+  }
+
   selectLesson(lesson: Lesson) {
+    if (!this.isLessonAccessible(lesson)) return;
+
     this.currentLesson = lesson;
+    
+    // Reset Quiz State
+    this.quiz = null;
+    this.quizLoading = false;
+    this.quizSubmitted = false;
+    this.quizResult = null;
+    this.userAnswers = {};
+
+    if (lesson.has_quiz) {
+      this.loadQuiz(lesson.id);
+    }
+
     this.updateUrl();
     window.scrollTo(0, 0);
+  }
+
+  loadQuiz(lessonId: number) {
+    this.quizLoading = true;
+    this.courseService.getQuizByLesson(lessonId).subscribe({
+      next: (res) => {
+        if (res.success) {
+            this.quiz = res.data;
+        }
+        this.quizLoading = false;
+      },
+      error: (err) => {
+        console.error('Error loading quiz', err);
+        this.quizLoading = false;
+      }
+    });
+  }
+
+  submitQuiz() {
+    if (!this.quiz) return;
+    
+    const answers = this.userAnswers;
+    
+    this.courseService.submitQuiz(this.quiz.id, answers).subscribe({
+      next: (res) => {
+        this.quizResult = res.data;
+        this.quizSubmitted = true;
+        
+        // Mark lesson as completed if passed
+        if (this.quizResult.score >= this.quiz.passing_score && this.currentLesson && !this.currentLesson.is_completed) {
+           this.markLessonComplete(this.currentLesson.id);
+        }
+      },
+      error: (err) => this.toastService.error('Failed to submit quiz')
+    });
   }
 
   updateUrl() {
@@ -86,47 +163,63 @@ export class LearningComponent implements OnInit {
   toggleCompletion() {
     if (!this.currentLesson) return;
 
-    const action = this.currentLesson.is_completed 
-      ? this.courseService.incompleteLesson(this.currentLesson.id)
-      : this.courseService.completeLesson(this.currentLesson.id);
+    if (this.currentLesson.is_completed) {
+        this.courseService.incompleteLesson(this.currentLesson.id).subscribe({
+            next: (res) => {
+                if (this.currentLesson) {
+                    this.currentLesson.is_completed = false;
+                    this.calculateProgress();
+                }
+            }
+        });
+    } else {
+        this.markLessonComplete(this.currentLesson.id);
+    }
+  }
 
-    action.subscribe({
-      next: (res) => {
-        if (this.currentLesson) {
-            this.currentLesson.is_completed = res.is_completed;
-            this.calculateProgress();
+  markLessonComplete(lessonId: number) {
+      this.courseService.completeLesson(lessonId).subscribe({
+        next: (res) => {
+            if (this.currentLesson && this.currentLesson.id === lessonId) {
+                this.currentLesson.is_completed = true;
+                this.calculateProgress();
+            }
+            // If passed via other means (quiz), update model
+            if (this.course?.lessons) {
+                const l = this.course.lessons.find(l => l.id === lessonId);
+                if (l) l.is_completed = true;
+                this.calculateProgress();
+            }
         }
-      },
-      error: (err) => alert('Failed to update status')
-    });
+      });
   }
 
   calculateProgress() {
-    if (!this.course || !this.course.lessons || this.course.lessons.length === 0) {
+    if (!this.course?.lessons?.length) {
       this.progress = 0;
       return;
     }
-    const completedCount = this.course.lessons.filter(l => l.is_completed).length;
-    this.progress = Math.round((completedCount / this.course.lessons.length) * 100);
+    const completed = this.course.lessons.filter(l => l.is_completed).length;
+    this.progress = Math.round((completed / this.course.lessons.length) * 100);
   }
 
   toggleSidebar() {
     this.sidebarOpen = !this.sidebarOpen;
   }
 
-  nextLesson() {
-    if (!this.course || !this.course.lessons || !this.currentLesson) return;
-    const currentIndex = this.course.lessons.findIndex(l => l.id === this.currentLesson!.id);
-    if (currentIndex < this.course.lessons.length - 1) {
-      this.selectLesson(this.course.lessons[currentIndex + 1]);
-    }
-  }
-
   prevLesson() {
-    if (!this.course || !this.course.lessons || !this.currentLesson) return;
+    if (!this.course?.lessons || !this.currentLesson) return;
     const currentIndex = this.course.lessons.findIndex(l => l.id === this.currentLesson!.id);
     if (currentIndex > 0) {
       this.selectLesson(this.course.lessons[currentIndex - 1]);
+    }
+  }
+
+  nextLesson() {
+    if (!this.course?.lessons || !this.currentLesson) return;
+    const currentIndex = this.course.lessons.findIndex(l => l.id === this.currentLesson!.id);
+    if (currentIndex < this.course.lessons.length - 1) {
+      this.selectLesson(this.course.lessons[currentIndex + 1]);
     }
   }
 }

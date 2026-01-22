@@ -50,8 +50,8 @@ export class MyLearningComponent implements OnInit {
 
   ngOnInit() {
     this.courseService.getMyCourses().subscribe({
-      next: (data) => {
-        this.courses = data;
+      next: (data: any) => {
+        this.courses = data.data || data;
         this.isLoading = false;
       },
       error: (err) => {

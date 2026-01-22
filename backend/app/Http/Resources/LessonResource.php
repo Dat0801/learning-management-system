@@ -15,6 +15,7 @@ class LessonResource extends JsonResource
             'content' => $this->content,
             'order' => $this->order,
             'is_completed' => (bool) ($this->is_completed ?? false),
+            'has_quiz' => $this->quiz()->exists(),
         ];
     }
 }

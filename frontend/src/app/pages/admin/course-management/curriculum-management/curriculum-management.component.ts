@@ -2,11 +2,13 @@ import { Component, Input, OnInit, OnChanges, SimpleChanges } from '@angular/cor
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdminService } from '../../../../core/services/admin.service';
+import { ToastService } from '../../../../services/toast.service';
+import { QuizManagementComponent } from '../quiz-management/quiz-management.component';
 
 @Component({
   selector: 'app-curriculum-management',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, QuizManagementComponent],
   templateUrl: './curriculum-management.component.html',
   styleUrl: './curriculum-management.component.scss'
 })
@@ -17,8 +19,13 @@ export class CurriculumManagementComponent implements OnInit, OnChanges {
   
   editingLesson: any = null;
   isEditing = false;
+  
+  selectedLessonForQuiz: any = null;
 
-  constructor(private adminService: AdminService) {}
+  constructor(
+    private adminService: AdminService,
+    private toastService: ToastService
+  ) {}
 
   ngOnInit() {
     if (this.courseId) {
@@ -80,10 +87,11 @@ export class CurriculumManagementComponent implements OnInit, OnChanges {
       next: () => {
         this.loadLessons();
         this.cancelEdit();
+        this.toastService.success('Lesson saved successfully');
       },
       error: (err) => {
         console.error('Error saving lesson', err);
-        alert('Failed to save lesson');
+        this.toastService.error('Failed to save lesson');
       }
     });
   }
@@ -94,11 +102,20 @@ export class CurriculumManagementComponent implements OnInit, OnChanges {
     this.adminService.deleteLesson(this.courseId, lesson.id).subscribe({
       next: () => {
         this.loadLessons();
+        this.toastService.success('Lesson deleted successfully');
       },
       error: (err) => {
         console.error('Error deleting lesson', err);
-        alert('Failed to delete lesson');
+        this.toastService.error('Failed to delete lesson');
       }
     });
+  }
+
+  manageQuiz(lesson: any) {
+    this.selectedLessonForQuiz = lesson;
+  }
+
+  closeQuiz() {
+    this.selectedLessonForQuiz = null;
   }
 }

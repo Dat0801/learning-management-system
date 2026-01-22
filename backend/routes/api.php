@@ -10,6 +10,8 @@ use App\Http\Controllers\Api\QuizController;
 use App\Http\Controllers\Api\LessonController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\AdminLessonController;
+use App\Http\Controllers\Api\AdminQuizController;
+use App\Http\Controllers\Api\ReviewController;
 
 /*
 |--------------------------------------------------------------------------
@@ -29,6 +31,7 @@ Route::middleware('optional.auth')->group(function () {
     Route::get('courses/popular', [CourseController::class, 'popular']);
     Route::get('courses', [CourseController::class, 'index']);
     Route::get('courses/{course}', [CourseController::class, 'show']);
+    Route::get('/lessons/{lesson}', [LessonController::class, 'show']);
 });
 
 // Protected routes
@@ -37,6 +40,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', function (Request $request) {
         return $request->user();
     });
+    
+    // Profile Management
+    Route::put('/profile', [AuthController::class, 'updateProfile']);
+    Route::put('/profile/password', [AuthController::class, 'changePassword']);
+
+    // Wishlist
+    Route::get('/wishlist', [WishlistController::class, 'index']);
+    Route::post('/wishlist', [WishlistController::class, 'store']);
+    Route::delete('/wishlist/{course}', [WishlistController::class, 'destroy']);
 
     // Protected Course Operations
     Route::post('courses', [CourseController::class, 'store']);
@@ -48,13 +60,16 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/my-courses', [EnrollmentController::class, 'myEnrollments']);
 
     // Lessons
-    Route::get('/lessons/{lesson}', [LessonController::class, 'show']);
     Route::post('/lessons/{lesson}/complete', [LessonController::class, 'complete']);
     Route::delete('/lessons/{lesson}/complete', [LessonController::class, 'incomplete']);
 
     // Quizzes
     Route::get('/lessons/{lesson}/quiz', [QuizController::class, 'showByLesson']);
     Route::post('/quizzes/{quiz}/submit', [QuizController::class, 'submit']);
+
+    // Reviews
+    Route::post('/courses/{course}/reviews', [ReviewController::class, 'store']);
+    Route::delete('/reviews/{review}', [ReviewController::class, 'destroy']);
 });
 
 // Admin Routes
@@ -91,4 +106,17 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
     Route::post('/courses/{course}/lessons', [AdminLessonController::class, 'store']);
     Route::put('/courses/{course}/lessons/{lesson}', [AdminLessonController::class, 'update']);
     Route::delete('/courses/{course}/lessons/{lesson}', [AdminLessonController::class, 'destroy']);
+
+    // Quiz Management
+    Route::get('/lessons/{lesson}/quiz', [AdminQuizController::class, 'getQuiz']);
+    Route::post('/lessons/{lesson}/quiz', [AdminQuizController::class, 'storeQuiz']);
+    Route::delete('/quizzes/{quiz}', [AdminQuizController::class, 'deleteQuiz']);
+
+    Route::post('/quizzes/{quiz}/questions', [AdminQuizController::class, 'storeQuestion']);
+    Route::put('/questions/{question}', [AdminQuizController::class, 'updateQuestion']);
+    Route::delete('/questions/{question}', [AdminQuizController::class, 'deleteQuestion']);
+
+    Route::post('/questions/{question}/answers', [AdminQuizController::class, 'storeAnswer']);
+    Route::put('/answers/{answer}', [AdminQuizController::class, 'updateAnswer']);
+    Route::delete('/answers/{answer}', [AdminQuizController::class, 'deleteAnswer']);
 });

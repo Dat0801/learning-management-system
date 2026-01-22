@@ -1,0 +1,95 @@
+<div class="quiz-container">
+  <div *ngIf="isLoading">Loading quiz...</div>
+
+  <!-- Create Quiz State -->
+  <div *ngIf="!isLoading && !quiz && !isEditingQuiz" class="empty-state">
+    <p>No quiz defined for this lesson.</p>
+    <button class="btn-primary" (click)="startCreateQuiz()">Create Quiz</button>
+  </div>
+
+  <!-- Quiz Display -->
+  <div *ngIf="!isLoading && quiz && !isEditingQuiz">
+    <div class="quiz-header">
+      <div class="quiz-info">
+        <h3>{{ quiz.title }}</h3>
+        <p class="desc">{{ quiz.description }}</p>
+        <span class="badge">Passing Score: {{ quiz.passing_score }}%</span>
+      </div>
+      <div class="quiz-actions">
+        <button class="btn-sm" (click)="startEditQuiz()">Edit Quiz</button>
+        <button class="btn-sm btn-danger" (click)="deleteQuiz()">Delete Quiz</button>
+      </div>
+    </div>
+
+    <div class="questions-section">
+      <h4>Questions</h4>
+      
+      <div class="question-list">
+        <div class="question-item" *ngFor="let question of quiz.questions">
+          <div class="question-header">
+            <span class="order">Q{{ question.order }}</span>
+            <span class="text">{{ question.question_text }}</span>
+            <div class="actions">
+              <button class="btn-xs" (click)="startEditQuestion(question)">Edit</button>
+              <button class="btn-xs btn-danger" (click)="deleteQuestion(question)">Delete</button>
+              <button class="btn-xs btn-success" (click)="addAnswer(question)">+ Answer</button>
+            </div>
+          </div>
+          
+          <div class="answers-list">
+            <div class="answer-item" *ngFor="let answer of question.answers" [class.correct]="answer.is_correct">
+              <span class="icon">{{ answer.is_correct ? '✅' : '⚪' }}</span>
+              <span class="text">{{ answer.answer_text }}</span>
+              <div class="actions">
+                <button class="btn-xs" (click)="toggleCorrect(answer)">Toggle Correct</button>
+                <button class="btn-xs btn-danger" (click)="deleteAnswer(answer)">Delete</button>
+              </div>
+            </div>
+            <div *ngIf="!question.answers?.length" class="no-answers">No answers yet.</div>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn-add-question" (click)="startAddQuestion()" *ngIf="!isEditingQuestion">+ Add Question</button>
+    </div>
+  </div>
+
+  <!-- Quiz Edit Form -->
+  <div class="edit-form" *ngIf="isEditingQuiz">
+    <h4>{{ quiz.id ? 'Edit Quiz' : 'New Quiz' }}</h4>
+    <div class="form-group">
+      <label>Title</label>
+      <input [(ngModel)]="quiz.title" class="form-control">
+    </div>
+    <div class="form-group">
+      <label>Description</label>
+      <textarea [(ngModel)]="quiz.description" class="form-control"></textarea>
+    </div>
+    <div class="form-group">
+      <label>Passing Score (%)</label>
+      <input type="number" [(ngModel)]="quiz.passing_score" class="form-control">
+    </div>
+    <div class="form-actions">
+      <button class="btn-primary" (click)="saveQuiz()">Save</button>
+      <button class="btn-secondary" (click)="cancelEditQuiz()">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Question Edit Form -->
+  <div class="edit-form" *ngIf="isEditingQuestion">
+    <h4>{{ editingQuestion.id ? 'Edit Question' : 'New Question' }}</h4>
+    <div class="form-group">
+      <label>Question Text</label>
+      <textarea [(ngModel)]="editingQuestion.question_text" class="form-control"></textarea>
+    </div>
+    <div class="form-group">
+      <label>Order</label>
+      <input type="number" [(ngModel)]="editingQuestion.order" class="form-control">
+    </div>
+    <div class="form-actions">
+      <button class="btn-primary" (click)="saveQuestion()">Save Question</button>
+      <button class="btn-secondary" (click)="cancelEditQuestion()">Cancel</button>
+    </div>
+  </div>
+
+</div>

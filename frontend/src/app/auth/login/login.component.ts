@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-login',
@@ -16,7 +16,8 @@ export class LoginComponent {
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute
   ) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
@@ -32,7 +33,12 @@ export class LoginComponent {
           if (user && user.role === 'admin') {
             this.router.navigate(['/admin/dashboard']);
           } else {
-            this.router.navigate(['/courses']);
+            const returnUrl = this.route.snapshot.queryParams['returnUrl'];
+            if (returnUrl) {
+              this.router.navigateByUrl(returnUrl);
+            } else {
+              this.router.navigate(['/courses']);
+            }
           }
         },
         error: (err) => {

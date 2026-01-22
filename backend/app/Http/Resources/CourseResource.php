@@ -19,6 +19,9 @@ class CourseResource extends JsonResource
             'instructor' => new UserResource($this->whenLoaded('instructor')),
             'lessons' => LessonResource::collection($this->whenLoaded('lessons')),
             'is_enrolled' => (bool) ($this->is_enrolled ?? false),
+            'average_rating' => round($this->average_rating, 1),
+            'reviews_count' => $this->reviews_count,
+            'category' => $this->whenLoaded('category'),
         ];
     }
 }

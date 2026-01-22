@@ -56,7 +56,11 @@
     }
   }
 
-  .actions {
+    .actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+
     button {
       padding: 0.75rem 2rem;
       border-radius: 6px;
@@ -75,6 +79,23 @@
         background-color: #ffffff;
         color: #111827;
         &:hover { background-color: #f9fafb; }
+      }
+      
+      &.btn-wishlist {
+        padding: 0.75rem;
+        background-color: rgba(255, 255, 255, 0.2);
+        color: white;
+        font-size: 1.5rem;
+        line-height: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+        
+        &:hover {
+          background-color: rgba(255, 255, 255, 0.3);
+          transform: scale(1.05);
+        }
       }
     }
   }

@@ -58,4 +58,24 @@ export class CourseService {
   incompleteLesson(lessonId: number): Observable<any> {
     return this.http.delete(`${environment.apiUrl}/lessons/${lessonId}/complete`);
   }
+
+  getReviews(courseId: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/${courseId}/reviews`);
+  }
+
+  createReview(courseId: number, data: { rating: number; comment: string }): Observable<any> {
+    return this.http.post(`${this.apiUrl}/${courseId}/reviews`, data);
+  }
+
+  deleteReview(reviewId: number): Observable<any> {
+    return this.http.delete(`${environment.apiUrl}/reviews/${reviewId}`);
+  }
+
+  getQuizByLesson(lessonId: number): Observable<any> {
+    return this.http.get<any>(`${environment.apiUrl}/lessons/${lessonId}/quiz`);
+  }
+
+  submitQuiz(quizId: number, answers: any): Observable<any> {
+    return this.http.post<any>(`${environment.apiUrl}/quizzes/${quizId}/submit`, { answers });
+  }
 }

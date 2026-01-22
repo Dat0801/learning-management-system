@@ -9,15 +9,66 @@
       </button>
     </div>
 
-    <div class="video-player">
-      <!-- Placeholder for Video Player -->
-      <div class="player-placeholder">
+    <!-- Quiz Mode -->
+    <div class="quiz-container" *ngIf="quiz && !quizSubmitted">
+        <div class="quiz-header">
+            <h2>{{ quiz.title }}</h2>
+            <p>{{ quiz.description }}</p>
+            <span class="badge">Passing Score: {{ quiz.passing_score }}%</span>
+        </div>
+        
+        <div class="quiz-questions">
+            <div *ngFor="let question of quiz.questions; let i = index" class="question-item">
+                <p class="q-text"><strong>Q{{ i + 1 }}.</strong> {{ question.question_text }}</p>
+                <div class="answers">
+                    <div *ngFor="let answer of question.answers" class="answer-option">
+                        <label>
+                            <input type="radio" [name]="'q' + question.id" [value]="answer.id" [(ngModel)]="userAnswers[question.id]">
+                            {{ answer.answer_text }}
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="quiz-actions">
+            <button class="btn-primary" (click)="submitQuiz()" [disabled]="quizLoading">Submit Quiz</button>
+        </div>
+    </div>
+
+    <!-- Quiz Result Mode -->
+    <div class="quiz-result" *ngIf="quizSubmitted">
+        <h2>Quiz Result</h2>
+        <div class="score-card" [class.passed]="quizResult.passed" [class.failed]="!quizResult.passed">
+            <h3>Score: {{ quizResult.score }}%</h3>
+            <p>{{ quizResult.passed ? 'Congratulations! You passed.' : 'You did not pass. Try again.' }}</p>
+        </div>
+        <div class="result-actions">
+            <button class="btn-secondary" (click)="selectLesson(currentLesson!)">Retry Quiz</button> 
+            <button class="btn-primary" *ngIf="quizResult.passed" (click)="nextLesson()">Next Lesson</button>
+        </div>
+    </div>
+
+    <!-- Video Mode (Default) -->
+    <div class="video-player" *ngIf="!quiz && !quizSubmitted">
+      <video 
+        *ngIf="currentLesson.video_url" 
+        controls 
+        [src]="currentLesson.video_url" 
+        class="real-video-player"
+        controlsList="nodownload"
+      >
+        Your browser does not support the video tag.
+      </video>
+      <!-- Placeholder for Video Player (Fallback) -->
+      <div *ngIf="!currentLesson.video_url" class="player-placeholder">
         <div class="play-icon">▶</div>
         <p>Video for: {{ currentLesson.title }}</p>
+        <p *ngIf="currentLesson.content" class="lesson-content-preview">{{ currentLesson.content }}</p>
       </div>
     </div>
 
-    <div class="lesson-details">
+    <div class="lesson-details" *ngIf="!quiz">
       <div class="lesson-header">
         <h1>{{ currentLesson.title }}</h1>
         <div class="actions">
@@ -59,17 +110,22 @@
         *ngFor="let lesson of course.lessons; let i = index"
         [class.active]="lesson.id === currentLesson.id"
         [class.completed]="lesson.is_completed"
+        [class.locked]="!isLessonAccessible(lesson)"
         (click)="selectLesson(lesson)"
       >
         <div class="status-indicator">
           <span *ngIf="lesson.is_completed" class="check">✓</span>
-          <span *ngIf="!lesson.is_completed && lesson.id !== currentLesson.id" class="lock">○</span>
+          <span *ngIf="!lesson.is_completed && !isLessonAccessible(lesson)" class="lock">🔒</span>
+          <span *ngIf="!lesson.is_completed && isLessonAccessible(lesson) && lesson.id !== currentLesson.id" class="play-icon">○</span>
           <span *ngIf="lesson.id === currentLesson.id && !lesson.is_completed" class="play">▶</span>
         </div>
         <div class="lesson-info">
           <span class="lesson-number">Lesson {{ i + 1 }}</span>
-          <span class="lesson-title">{{ lesson.title }}</span>
-          <!-- <span class="lesson-duration">10:00</span> -->
+          <span class="lesson-title">
+             {{ lesson.title }} 
+             <span *ngIf="lesson.is_preview && !course.is_enrolled" class="text-xs text-blue-500">(Preview)</span>
+          </span>
+          <span class="quiz-badge" *ngIf="lesson.has_quiz">Quiz</span>
         </div>
       </div>
     </div>

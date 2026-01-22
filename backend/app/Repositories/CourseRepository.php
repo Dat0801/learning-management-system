@@ -78,6 +78,15 @@ class CourseRepository implements CourseRepositoryInterface
             }
         }
 
+        // Security: Hide content and video_url for non-enrolled users unless it's a preview
+        if (!$course->is_enrolled) {
+            foreach ($course->lessons as $lesson) {
+                if (!$lesson->is_preview) {
+                    $lesson->makeHidden(['video_url', 'content']);
+                }
+            }
+        }
+
         return $course;
     }
 

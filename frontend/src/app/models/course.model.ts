@@ -2,8 +2,12 @@ export interface Lesson {
   id: number;
   title: string;
   content: string;
+  video_url?: string;
+  duration?: string;
+  is_preview?: boolean;
   order: number;
   is_completed?: boolean;
+  has_quiz?: boolean;
 }
 
 export interface User {
