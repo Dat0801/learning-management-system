@@ -121,4 +121,41 @@ export class AdminService {
   deleteLesson(courseId: number, lessonId: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/courses/${courseId}/lessons/${lessonId}`);
   }
+
+  // Quiz Management
+  getQuiz(lessonId: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/lessons/${lessonId}/quiz`);
+  }
+
+  createOrUpdateQuiz(lessonId: number, data: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/lessons/${lessonId}/quiz`, data);
+  }
+
+  deleteQuiz(quizId: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/quizzes/${quizId}`);
+  }
+
+  createQuestion(quizId: number, data: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/quizzes/${quizId}/questions`, data);
+  }
+
+  updateQuestion(questionId: number, data: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/questions/${questionId}`, data);
+  }
+
+  deleteQuestion(questionId: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/questions/${questionId}`);
+  }
+
+  createAnswer(questionId: number, data: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/questions/${questionId}/answers`, data);
+  }
+
+  updateAnswer(answerId: number, data: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/answers/${answerId}`, data);
+  }
+
+  deleteAnswer(answerId: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/answers/${answerId}`);
+  }
 }

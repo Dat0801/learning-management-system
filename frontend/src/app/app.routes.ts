@@ -32,14 +32,18 @@ export const routes: Routes = [
         canActivate: [authGuard]
       },
       { 
+        path: 'wishlist', 
+        loadComponent: () => import('./pages/wishlist/wishlist.component').then(m => m.WishlistComponent),
+        canActivate: [authGuard]
+      },
+      { 
         path: 'profile', 
         loadComponent: () => import('./pages/profile/profile.component').then(m => m.ProfileComponent),
         canActivate: [authGuard]
       },
       {
         path: 'learning/:courseId',
-        loadComponent: () => import('./pages/learning/learning.component').then(m => m.LearningComponent),
-        canActivate: [authGuard]
+        loadComponent: () => import('./pages/learning/learning.component').then(m => m.LearningComponent)
       }
     ]
   },

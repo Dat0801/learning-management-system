@@ -34,12 +34,12 @@ export class StudentHomeComponent implements OnInit {
 
   loadData() {
     this.courseService.getRecommendedCourses().subscribe({
-      next: (data) => this.recommendedCourses = data,
+      next: (data: any) => this.recommendedCourses = data.data || data,
       error: (err) => console.error('Error loading recommended courses', err)
     });
 
     this.courseService.getPopularCourses().subscribe({
-      next: (data) => this.popularCourses = data,
+      next: (data: any) => this.popularCourses = data.data || data,
       error: (err) => console.error('Error loading popular courses', err)
     });
   }

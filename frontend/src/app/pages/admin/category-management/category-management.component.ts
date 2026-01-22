@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdminService } from '../../../core/services/admin.service';
+import { ToastService } from '../../../services/toast.service';
 
 @Component({
   selector: 'app-category-management',
@@ -12,6 +13,8 @@ import { AdminService } from '../../../core/services/admin.service';
 })
 export class CategoryManagementComponent implements OnInit {
   categories: any[] = [];
+  filteredCategories: any[] = [];
+  searchTerm: string = '';
   isLoading = false;
   showModal = false;
   editingCategory: any = {
@@ -21,7 +24,10 @@ export class CategoryManagementComponent implements OnInit {
     parent_id: null
   };
 
-  constructor(private adminService: AdminService) {}
+  constructor(
+    private adminService: AdminService,
+    private toastService: ToastService
+  ) {}
 
   ngOnInit() {
     this.loadCategories();
@@ -32,6 +38,7 @@ export class CategoryManagementComponent implements OnInit {
     this.adminService.getAllCategories().subscribe({
       next: (data) => {
         this.categories = data;
+        this.filterCategories();
         this.isLoading = false;
       },
       error: (err) => {
@@ -39,6 +46,23 @@ export class CategoryManagementComponent implements OnInit {
         this.isLoading = false;
       }
     });
+  }
+
+  onSearch() {
+    this.filterCategories();
+  }
+
+  filterCategories() {
+    if (!this.searchTerm) {
+      this.filteredCategories = this.categories;
+      return;
+    }
+    const term = this.searchTerm.toLowerCase();
+    this.filteredCategories = this.categories.filter(cat => 
+      cat.name.toLowerCase().includes(term) || 
+      cat.slug.toLowerCase().includes(term) ||
+      (cat.description && cat.description.toLowerCase().includes(term))
+    );
   }
 
   openCreateModal() {
@@ -79,10 +103,11 @@ export class CategoryManagementComponent implements OnInit {
       next: () => {
         this.loadCategories();
         this.closeModal();
+        this.toastService.success('Category saved successfully');
       },
       error: (err) => {
         console.error('Error saving category', err);
-        alert('Failed to save category');
+        this.toastService.error('Failed to save category');
       }
     });
   }
@@ -92,10 +117,11 @@ export class CategoryManagementComponent implements OnInit {
       this.adminService.deleteCategory(id).subscribe({
         next: () => {
           this.loadCategories();
+          this.toastService.success('Category deleted successfully');
         },
         error: (err) => {
           console.error('Error deleting category', err);
-          alert('Failed to delete category (Ensure it has no courses)');
+          this.toastService.error('Failed to delete category (Ensure it has no courses)');
         }
       });
     }

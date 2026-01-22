@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdminService } from '../../../core/services/admin.service';
+import { ToastService } from '../../../services/toast.service';
 import { Observable } from 'rxjs';
 
 @Component({
@@ -24,7 +25,10 @@ export class UserManagementComponent implements OnInit {
 
   roles = ['student', 'instructor', 'admin'];
 
-  constructor(private adminService: AdminService) {}
+  constructor(
+    private adminService: AdminService,
+    private toastService: ToastService
+  ) {}
 
   ngOnInit(): void {
     this.loadUsers();
@@ -63,11 +67,11 @@ export class UserManagementComponent implements OnInit {
         next: () => {
           this.showEditForm = false;
           this.loadUsers();
-          alert(this.editingUser.id ? 'User updated successfully' : 'User created successfully');
+          this.toastService.success(this.editingUser.id ? 'User updated successfully' : 'User created successfully');
         },
         error: (err) => {
           console.error('Error saving user:', err);
-          alert('Failed to save user');
+          this.toastService.error('Failed to save user');
         }
       });
     }
@@ -77,7 +81,7 @@ export class UserManagementComponent implements OnInit {
     if (confirm('Are you sure you want to delete this user?')) {
       this.adminService.deleteUser(userId).subscribe(() => {
         this.loadUsers();
-        alert('User deleted successfully');
+        this.toastService.success('User deleted successfully');
       });
     }
   }
@@ -94,11 +98,11 @@ export class UserManagementComponent implements OnInit {
       this.adminService.createEnrollment(this.enrollingUser.id, this.selectedCourseId).subscribe({
         next: () => {
           this.showEnrollModal = false;
-          alert('User enrolled successfully');
+          this.toastService.success('User enrolled successfully');
         },
         error: (err) => {
           console.error('Error enrolling user:', err);
-          alert('Failed to enroll user: ' + (err.error?.message || 'Unknown error'));
+          this.toastService.error('Failed to enroll user: ' + (err.error?.message || 'Unknown error'));
         }
       });
     }

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Course;
 use App\Models\Enrollment;
+use App\Models\Review;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
@@ -20,6 +21,8 @@ class AdminController extends Controller
             'total_instructors' => User::where('role', 'instructor')->count(),
             'total_courses' => Course::count(),
             'total_enrollments' => Enrollment::count(),
+            'total_reviews' => Review::count(),
+            'average_rating' => round(Review::avg('rating') ?? 0, 1),
             'revenue' => Course::sum('price'),
         ]);
     }

@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdminService } from '../../../core/services/admin.service';
+import { ToastService } from '../../../services/toast.service';
 import { Observable } from 'rxjs';
 import { CurriculumManagementComponent } from './curriculum-management/curriculum-management.component';
 
@@ -22,7 +23,10 @@ export class CourseManagementComponent implements OnInit {
 
   statuses = ['draft', 'published', 'archived'];
 
-  constructor(private adminService: AdminService) {}
+  constructor(
+    private adminService: AdminService,
+    private toastService: ToastService
+  ) {}
 
   ngOnInit(): void {
     this.loadCourses();
@@ -77,11 +81,11 @@ export class CourseManagementComponent implements OnInit {
         next: () => {
           this.showEditForm = false;
           this.loadCourses();
-          alert(this.editingCourse.id ? 'Course updated successfully' : 'Course created successfully');
+          this.toastService.success(this.editingCourse.id ? 'Course updated successfully' : 'Course created successfully');
         },
         error: (err) => {
           console.error('Error saving course:', err);
-          alert('Failed to save course: ' + (err.error?.message || 'Unknown error'));
+          this.toastService.error('Failed to save course: ' + (err.error?.message || 'Unknown error'));
         }
       });
     }
@@ -91,7 +95,7 @@ export class CourseManagementComponent implements OnInit {
     if (confirm('Are you sure you want to delete this course?')) {
       this.adminService.deleteCourseAdmin(courseId).subscribe(() => {
         this.loadCourses();
-        alert('Course deleted successfully');
+        this.toastService.success('Course deleted successfully');
       });
     }
   }

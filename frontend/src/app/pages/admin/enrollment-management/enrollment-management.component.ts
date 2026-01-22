@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AdminService } from '../../../core/services/admin.service';
+import { ToastService } from '../../../services/toast.service';
 import { Observable } from 'rxjs';
 
 @Component({
@@ -13,7 +14,10 @@ import { Observable } from 'rxjs';
 export class EnrollmentManagementComponent implements OnInit {
   enrollments$: Observable<any> | null = null;
 
-  constructor(private adminService: AdminService) {}
+  constructor(
+    private adminService: AdminService,
+    private toastService: ToastService
+  ) {}
 
   ngOnInit(): void {
     this.loadEnrollments();
@@ -27,7 +31,7 @@ export class EnrollmentManagementComponent implements OnInit {
     if (confirm('Are you sure you want to delete this enrollment?')) {
       this.adminService.deleteEnrollment(enrollmentId).subscribe(() => {
         this.loadEnrollments();
-        alert('Enrollment deleted successfully');
+        this.toastService.success('Enrollment deleted successfully');
       });
     }
   }

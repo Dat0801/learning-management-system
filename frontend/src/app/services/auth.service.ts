@@ -37,6 +37,22 @@ export class AuthService {
     );
   }
 
+  updateProfile(data: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/profile`, data).pipe(
+      tap((res: any) => {
+        const responseData = res.data || res;
+        // Update user in local storage and subject if returned
+        if (responseData.user) {
+            this.setUser(responseData.user);
+        }
+      })
+    );
+  }
+
+  changePassword(data: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/profile/password`, data);
+  }
+
   logout(): void {
     // Optional: Call backend logout endpoint if available
     // this.http.post(`${this.apiUrl}/logout`, {}).subscribe();

@@ -50,6 +50,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
+
+  .real-video-player {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
 
   .player-placeholder {
     color: white;
@@ -98,21 +105,23 @@
         &.btn-nav {
           background-color: #f3f4f6;
           color: var(--text-main);
+          &:hover { background-color: #e5e7eb; }
           &:disabled { opacity: 0.5; cursor: not-allowed; }
-          &:hover:not(:disabled) { background-color: #e5e7eb; }
         }
 
         &.btn-complete {
-          background-color: var(--accent-green);
-          color: #ffffff;
-          
+          background-color: #f3f4f6;
+          color: var(--text-main);
+          border: 1px solid #d1d5db;
+
           &.completed {
-            background-color: #fff;
-            border: 1px solid var(--accent-green);
-            color: var(--accent-green);
+            background-color: #10b981;
+            color: white;
+            border-color: #10b981;
+            &:hover { background-color: #059669; }
           }
           
-          &:hover { opacity: 0.9; }
+          &:hover:not(.completed) { background-color: #e5e7eb; }
         }
       }
     }
@@ -121,11 +130,7 @@
   .lesson-description {
     color: var(--text-muted);
     line-height: 1.6;
-    h3 {
-      font-size: 1.2rem;
-      margin-bottom: 0.5rem;
-      color: var(--text-main);
-    }
+    h3 { color: var(--text-main); margin-bottom: 1rem; }
   }
 }
 
@@ -136,34 +141,31 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  
+
   .sidebar-header {
     padding: 1.5rem;
-    border-bottom: 1px solid #eee;
-
-    h3 {
-      margin: 0 0 1rem 0;
-      font-size: 1.1rem;
-    }
-
+    border-bottom: 1px solid var(--border-soft);
+    
+    h3 { margin: 0 0 1rem 0; }
+    
     .progress-container {
       .progress-info {
         display: flex;
         justify-content: space-between;
-        font-size: 0.9rem;
         margin-bottom: 0.5rem;
+        font-size: 0.9rem;
         color: var(--text-muted);
       }
-
+      
       .progress-bar {
-        height: 6px;
-        background-color: #e5e7eb;
-        border-radius: 3px;
+        height: 8px;
+        background-color: #f3f4f6;
+        border-radius: 4px;
         overflow: hidden;
-
+        
         .fill {
           height: 100%;
-          background-color: var(--accent-green);
+          background-color: #10b981;
           transition: width 0.3s ease;
         }
       }
@@ -173,55 +175,50 @@
   .lesson-list {
     flex: 1;
     overflow-y: auto;
-
+    
     .lesson-item {
       display: flex;
       padding: 1rem 1.5rem;
-      border-bottom: 1px solid #f3f4f6;
+      border-bottom: 1px solid var(--border-soft);
       cursor: pointer;
-      transition: background-color 0.2s;
-
-      &:hover {
-        background-color: #f9fafb;
+      transition: background 0.2s;
+      
+      &:hover { background-color: #f9fafb; }
+      &.active { background-color: #eff6ff; border-left: 4px solid #3b82f6; }
+      &.locked {
+          opacity: 0.6;
+          cursor: not-allowed;
+          &:hover { background-color: white; }
       }
-
-      &.active {
-        background-color: #e5edff;
-        border-left: 4px solid var(--primary-color);
-        
-        .lesson-info .lesson-title {
-          font-weight: 600;
-          color: var(--primary-color);
-        }
-      }
-
+      
       .status-indicator {
         margin-right: 1rem;
         display: flex;
         align-items: center;
         width: 20px;
         justify-content: center;
-
-        .check { color: #4caf50; font-weight: bold; }
-        .lock { color: #ccc; font-size: 0.8rem; }
-        .play { color: var(--primary-color); font-size: 0.8rem; }
+        
+        .check { color: #10b981; font-weight: bold; }
+        .lock { color: #9ca3af; font-size: 0.8rem; }
+        .play-icon { color: #9ca3af; font-size: 0.8rem; }
+        .play { color: #3b82f6; font-size: 0.8rem; }
       }
-
+      
       .lesson-info {
+        flex: 1;
         display: flex;
         flex-direction: column;
         
         .lesson-number {
-          font-size: 0.75rem;
+          font-size: 0.8rem;
           color: var(--text-muted);
-          text-transform: uppercase;
-          margin-bottom: 0.2rem;
+          margin-bottom: 0.25rem;
         }
-
+        
         .lesson-title {
-          font-size: 0.95rem;
+          font-weight: 500;
           color: var(--text-main);
-          line-height: 1.4;
+          font-size: 0.95rem;
         }
       }
     }
@@ -233,12 +230,11 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100%;
-  width: 100%;
+  height: 100vh;
   
   .spinner {
     border: 4px solid #f3f3f3;
-    border-top: 4px solid var(--primary-color);
+    border-top: 4px solid #3b82f6;
     border-radius: 50%;
     width: 40px;
     height: 40px;
@@ -252,28 +248,186 @@
   100% { transform: rotate(360deg); }
 }
 
-// Mobile Responsiveness
+// Media Queries
 @media (max-width: 768px) {
   .learning-container {
-    flex-direction: column;
-    height: auto;
-    overflow: visible;
+    position: relative;
   }
 
   .sidebar {
-    width: 100%;
-    height: auto;
-    border-left: none;
-    border-top: 1px solid #e0e0e0;
-  }
-
-  .main-content {
-    height: auto;
-  }
-
-  .video-player {
-    position: sticky;
+    position: absolute;
     top: 0;
+    right: 0;
+    bottom: 0;
     z-index: 10;
+    width: 100%;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
   }
+
+  .main-content:not(.full-width) + .sidebar {
+     transform: translateX(0);
+  }
+  
+  // Actually, sidebar logic above might conflict with *ngIf="sidebarOpen"
+  // If sidebarOpen is true, sidebar is in DOM.
+  // Better to just overlay it on mobile.
+}
+
+/* Quiz Styles */
+.quiz-container {
+  padding: 2rem;
+  background: white;
+  min-height: 500px;
+  
+  .quiz-header {
+    margin-bottom: 2rem;
+    border-bottom: 1px solid var(--border-soft);
+    padding-bottom: 1rem;
+    
+    h2 {
+      margin-top: 0;
+      color: var(--text-main);
+    }
+    p {
+      color: var(--text-muted);
+    }
+    .badge {
+      display: inline-block;
+      background: #e0f2fe;
+      color: #0369a1;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-weight: 500;
+      font-size: 0.875rem;
+    }
+  }
+  
+  .quiz-questions {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    margin-bottom: 2rem;
+    
+    .question-item {
+      background: #f9fafb;
+      padding: 1.5rem;
+      border-radius: 8px;
+      border: 1px solid var(--border-soft);
+      
+      .q-text {
+        font-size: 1.1rem;
+        margin-top: 0;
+        margin-bottom: 1rem;
+        color: var(--text-main);
+      }
+      
+      .answers {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        
+        .answer-option {
+          label {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 4px;
+            &:hover { background: #f3f4f6; }
+            
+            input[type="radio"] {
+              width: 1.2rem;
+              height: 1.2rem;
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  .quiz-actions {
+    display: flex;
+    justify-content: flex-end;
+  }
+}
+
+.quiz-result {
+  padding: 3rem 2rem;
+  text-align: center;
+  background: white;
+  
+  h2 { margin-bottom: 2rem; }
+  
+  .score-card {
+    display: inline-block;
+    padding: 2rem 4rem;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+    
+    &.passed {
+      background: #ecfdf5;
+      color: #065f46;
+      border: 2px solid #a7f3d0;
+    }
+    
+    &.failed {
+      background: #fef2f2;
+      color: #991b1b;
+      border: 2px solid #fecaca;
+    }
+    
+    h3 {
+      font-size: 2.5rem;
+      margin: 0 0 0.5rem 0;
+    }
+    p { margin: 0; font-size: 1.1rem; }
+  }
+  
+  .result-actions {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+  }
+}
+
+.quiz-badge {
+    background: #8b5cf6;
+    color: white;
+    font-size: 0.7rem;
+    padding: 0.1rem 0.4rem;
+    border-radius: 4px;
+    margin-left: 0.5rem;
+    text-transform: uppercase;
+}
+
+.btn-primary {
+  background-color: var(--primary-color, #3b82f6);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  
+  &:hover {
+    background-color: var(--primary-hover, #2563eb);
+  }
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.btn-secondary {
+    background-color: #9ca3af;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    &:hover { background-color: #6b7280; }
 }

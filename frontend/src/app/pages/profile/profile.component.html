@@ -1,21 +1,133 @@
 <div class="profile-container page-container">
-  <div class="profile-card">
-    <div class="profile-header">
-      <div class="avatar">
-        {{ user?.name?.charAt(0) || 'U' }}
+  <div class="profile-layout">
+    <!-- Sidebar -->
+    <div class="profile-sidebar">
+      <div class="user-info">
+        <div class="avatar">
+          {{ user?.name?.charAt(0) || 'U' }}
+        </div>
+        <h2>{{ user?.name || 'User' }}</h2>
+        <span class="role-badge">{{ user?.role || 'Student' }}</span>
+        <p class="join-date">Member since {{ user?.created_at | date:'mediumDate' }}</p>
       </div>
-      <h2>{{ user?.name || 'User' }}</h2>
-      <span class="role-badge">{{ user?.role || 'Student' }}</span>
+      
+      <div class="profile-nav">
+        <button 
+          class="nav-item" 
+          [class.active]="activeTab === 'profile'"
+          (click)="switchTab('profile')"
+        >
+          <span class="icon">👤</span> Profile Settings
+        </button>
+        <button 
+          class="nav-item" 
+          [class.active]="activeTab === 'password'"
+          (click)="switchTab('password')"
+        >
+          <span class="icon">🔒</span> Change Password
+        </button>
+      </div>
     </div>
-    
-    <div class="profile-details">
-      <div class="detail-item">
-        <label>Email</label>
-        <p>{{ user?.email }}</p>
+
+    <!-- Main Content -->
+    <div class="profile-content">
+      <!-- Alert Message -->
+      <div *ngIf="message.content" class="alert" [ngClass]="'alert-' + message.type">
+        {{ message.content }}
       </div>
-      <div class="detail-item">
-        <label>Member Since</label>
-        <p>{{ user?.created_at | date:'mediumDate' }}</p>
+
+      <!-- Profile Settings Tab -->
+      <div *ngIf="activeTab === 'profile'" class="content-card">
+        <h3>Profile Settings</h3>
+        <form [formGroup]="profileForm" (ngSubmit)="onSubmitProfile()">
+          <div class="form-group">
+            <label for="name">Full Name</label>
+            <input 
+              id="name" 
+              type="text" 
+              formControlName="name"
+              class="form-control"
+              [class.is-invalid]="profileForm.get('name')?.invalid && profileForm.get('name')?.touched"
+            >
+            <div class="invalid-feedback" *ngIf="profileForm.get('name')?.hasError('required')">
+              Name is required
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="email">Email Address</label>
+            <input 
+              id="email" 
+              type="email" 
+              formControlName="email"
+              class="form-control"
+              [class.is-invalid]="profileForm.get('email')?.invalid && profileForm.get('email')?.touched"
+            >
+            <div class="invalid-feedback" *ngIf="profileForm.get('email')?.hasError('required')">
+              Email is required
+            </div>
+            <div class="invalid-feedback" *ngIf="profileForm.get('email')?.hasError('email')">
+              Invalid email format
+            </div>
+          </div>
+
+          <button type="submit" class="btn-primary" [disabled]="profileForm.invalid || isUpdatingProfile">
+            {{ isUpdatingProfile ? 'Saving...' : 'Save Changes' }}
+          </button>
+        </form>
+      </div>
+
+      <!-- Change Password Tab -->
+      <div *ngIf="activeTab === 'password'" class="content-card">
+        <h3>Change Password</h3>
+        <form [formGroup]="passwordForm" (ngSubmit)="onSubmitPassword()">
+          <div class="form-group">
+            <label for="current_password">Current Password</label>
+            <input 
+              id="current_password" 
+              type="password" 
+              formControlName="current_password"
+              class="form-control"
+              [class.is-invalid]="passwordForm.get('current_password')?.invalid && passwordForm.get('current_password')?.touched"
+            >
+            <div class="invalid-feedback">Current password is required</div>
+          </div>
+
+          <div class="form-group">
+            <label for="new_password">New Password</label>
+            <input 
+              id="new_password" 
+              type="password" 
+              formControlName="new_password"
+              class="form-control"
+              [class.is-invalid]="passwordForm.get('new_password')?.invalid && passwordForm.get('new_password')?.touched"
+            >
+            <div class="invalid-feedback" *ngIf="passwordForm.get('new_password')?.hasError('required')">
+              New password is required
+            </div>
+            <div class="invalid-feedback" *ngIf="passwordForm.get('new_password')?.hasError('minlength')">
+              Password must be at least 8 characters
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="new_password_confirmation">Confirm New Password</label>
+            <input 
+              id="new_password_confirmation" 
+              type="password" 
+              formControlName="new_password_confirmation"
+              class="form-control"
+              [class.is-invalid]="passwordForm.hasError('mismatch') && passwordForm.get('new_password_confirmation')?.touched"
+            >
+            <div class="invalid-feedback" *ngIf="passwordForm.hasError('mismatch')">
+              Passwords do not match
+            </div>
+          </div>
+
+          <button type="submit" class="btn-primary" [disabled]="passwordForm.invalid || isChangingPassword">
+            {{ isChangingPassword ? 'Changing...' : 'Change Password' }}
+          </button>
+        </form>
       </div>
     </div>
   </div>

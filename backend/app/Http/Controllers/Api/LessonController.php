@@ -14,6 +14,25 @@ class LessonController extends Controller
         $user = auth()->user();
         $course = $lesson->course;
         
+        // Allow access if it's a preview lesson
+        if ($lesson->is_preview) {
+             $lesson->is_completed = false; // Default for non-enrolled
+             $lesson->has_quiz = $lesson->quiz()->exists();
+             
+             if ($user) {
+                 // Check completion if user is logged in
+                 $lesson->is_completed = LessonCompletion::where('user_id', $user->id)
+                    ->where('lesson_id', $lesson->id)
+                    ->exists();
+             }
+             
+             return response()->json($lesson);
+        }
+
+        if (!$user) {
+             return response()->json(['message' => 'Unauthenticated.'], 401);
+        }
+        
         $hasEnrollment = $user->enrollments()->where('course_id', $course->id)->exists();
         
         if (!$hasEnrollment) {
@@ -23,6 +42,8 @@ class LessonController extends Controller
         $lesson->is_completed = LessonCompletion::where('user_id', $user->id)
             ->where('lesson_id', $lesson->id)
             ->exists();
+
+        $lesson->has_quiz = $lesson->quiz()->exists();
 
         return response()->json($lesson);
     }
