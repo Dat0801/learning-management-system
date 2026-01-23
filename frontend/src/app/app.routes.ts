@@ -19,12 +19,17 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/student-home/student-home.component').then(m => m.StudentHomeComponent)
       },
       {
-        path: 'browse',
-        loadComponent: () => import('./pages/browse-categories/browse-categories.component').then(m => m.BrowseCategoriesComponent)
-      },
-      {
         path: 'courses',
-        loadChildren: () => import('./pages/courses/courses.module').then(m => m.CoursesModule)
+        children: [
+          {
+            path: '',
+            loadComponent: () => import('./pages/browse-categories/browse-categories.component').then(m => m.BrowseCategoriesComponent)
+          },
+          {
+            path: ':id',
+            loadComponent: () => import('./pages/course-detail/course-detail.component').then(m => m.CourseDetailComponent)
+          }
+        ]
       },
       { 
         path: 'my-learning', 

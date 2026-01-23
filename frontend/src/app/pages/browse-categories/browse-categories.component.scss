@@ -1,0 +1,332 @@
+@import '../../../styles/variables';
+@import '../../../styles/mixins';
+
+.course-catalog-page {
+  background-color: #f8f9fa;
+  min-height: calc(100vh - 64px); // Adjust based on header height
+  padding: 2rem 0;
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+    display: grid;
+    grid-template-columns: 250px 1fr;
+    gap: 2rem;
+
+    @include mobile {
+      grid-template-columns: 1fr;
+    }
+  }
+}
+
+// Sidebar Styles
+.filters-sidebar {
+  background: #fff;
+  border-radius: 8px;
+  padding: 1.5rem;
+  height: fit-content;
+  
+  @include mobile {
+    display: none; // Ideally should be a collapsible drawer on mobile
+  }
+
+  .filter-header {
+    margin-bottom: 1.5rem;
+    h3 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: $text-color;
+      margin: 0;
+    }
+  }
+
+  .filter-group {
+    margin-bottom: 2rem;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    .filter-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: $text-light;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+      letter-spacing: 0.05em;
+    }
+
+    .filter-options {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+
+      .sub-categories {
+        margin-left: 1.5rem;
+        margin-top: 0.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+    }
+  }
+}
+
+// Custom Checkbox & Radio Styles
+.custom-checkbox, .custom-radio {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-size: 0.95rem;
+  color: $text-color;
+  user-select: none;
+  
+  input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+  }
+
+  .checkmark, .radiomark {
+    height: 18px;
+    width: 18px;
+    background-color: #fff;
+    border: 2px solid #ddd;
+    border-radius: 4px;
+    margin-right: 10px;
+    position: relative;
+    transition: all 0.2s ease;
+  }
+
+  .radiomark {
+    border-radius: 50%;
+  }
+
+  &:hover input ~ .checkmark,
+  &:hover input ~ .radiomark {
+    border-color: $primary-color;
+  }
+
+  input:checked ~ .checkmark,
+  input:checked ~ .radiomark {
+    background-color: $primary-color;
+    border-color: $primary-color;
+  }
+
+  .checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+    left: 5px;
+    top: 1px;
+    width: 5px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+  }
+
+  .radiomark:after {
+    content: "";
+    position: absolute;
+    display: none;
+    top: 4px;
+    left: 4px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: white;
+  }
+
+  input:checked ~ .checkmark:after,
+  input:checked ~ .radiomark:after {
+    display: block;
+  }
+  
+  .label-text {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    
+    i {
+      font-size: 0.8rem;
+    }
+  }
+}
+
+// Main Content Styles
+.main-content {
+  .catalog-header {
+    margin-bottom: 2rem;
+
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+
+      h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        color: $text-color;
+        margin: 0;
+      }
+
+      .sort-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+
+        label {
+          font-size: 0.75rem;
+          font-weight: 700;
+          color: $text-light;
+          text-transform: uppercase;
+        }
+
+        .sort-select {
+          padding: 0.5rem 2rem 0.5rem 1rem;
+          border: 1px solid #ddd;
+          border-radius: 4px;
+          background-color: #fff;
+          font-size: 0.9rem;
+          color: $text-color;
+          cursor: pointer;
+          outline: none;
+          
+          &:focus {
+            border-color: $primary-color;
+          }
+        }
+      }
+    }
+
+    .results-count {
+      color: $text-light;
+      font-size: 0.95rem;
+      margin-bottom: 2rem;
+    }
+
+    .tabs-nav {
+      display: flex;
+      gap: 2rem;
+      border-bottom: 1px solid #eee;
+      
+      button {
+        background: none;
+        border: none;
+        padding: 0.75rem 0;
+        font-size: 1rem;
+        font-weight: 600;
+        color: $text-light;
+        cursor: pointer;
+        position: relative;
+        transition: color 0.2s;
+
+        &:hover {
+          color: $text-color;
+        }
+
+        &.active {
+          color: $primary-color;
+          
+          &:after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: $primary-color;
+          }
+        }
+      }
+    }
+  }
+
+  .course-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+
+    @include tablet {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    @include mobile {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+
+    .page-btn {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid #eee;
+      background: #fff;
+      border-radius: 4px;
+      color: $text-color;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+
+      &:hover:not(:disabled) {
+        background-color: #f0f0f0;
+      }
+
+      &.active {
+        background-color: $primary-color;
+        color: #fff;
+        border-color: $primary-color;
+      }
+
+      &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+    }
+
+    .dots {
+      color: $text-light;
+      font-weight: 600;
+      padding: 0 0.5rem;
+    }
+  }
+}
+
+.loading-state, .empty-state {
+  text-align: center;
+  padding: 4rem 0;
+  
+  .spinner {
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    border-left-color: $primary-color;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 1rem;
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.text-yellow-400 {
+  color: #facc15;
+}

@@ -1,78 +1,154 @@
-<div class="container mx-auto px-4 py-8">
-  <div class="flex flex-col md:flex-row gap-8">
-    <!-- Sidebar: Categories -->
-    <div class="w-full md:w-1/4">
-      <div class="bg-white rounded-lg shadow p-4 sticky top-4">
-        <h3 class="text-lg font-semibold mb-4">Categories</h3>
-        <ul class="space-y-2">
-          <li>
-            <button 
-              (click)="onCategorySelect(null)"
-              [class.text-blue-600]="!selectedCategorySlug"
-              [class.font-bold]="!selectedCategorySlug"
-              class="w-full text-left hover:text-blue-600 transition-colors">
-              All Categories
-            </button>
-          </li>
-          <li *ngFor="let cat of categories">
-            <button 
-              (click)="onCategorySelect(cat.slug)"
-              [class.text-blue-600]="selectedCategorySlug === cat.slug"
-              [class.font-bold]="selectedCategorySlug === cat.slug"
-              class="w-full text-left hover:text-blue-600 transition-colors">
-              {{ cat.name }}
-            </button>
-            <!-- Subcategories (if any) -->
-            <ul *ngIf="cat.children && cat.children.length > 0" class="pl-4 mt-1 space-y-1">
-              <li *ngFor="let child of cat.children">
-                <button 
-                  (click)="onCategorySelect(child.slug)"
-                  [class.text-blue-600]="selectedCategorySlug === child.slug"
-                  [class.font-bold]="selectedCategorySlug === child.slug"
-                  class="w-full text-left text-sm text-gray-600 hover:text-blue-600 transition-colors">
-                  {{ child.name }}
-                </button>
-              </li>
-            </ul>
-          </li>
-        </ul>
+<div class="course-catalog-page">
+  <div class="container">
+    
+    <!-- Left Sidebar: Filters -->
+    <aside class="filters-sidebar">
+      <div class="filter-header">
+        <h3>Filters</h3>
       </div>
-    </div>
 
-    <!-- Main Content: Courses -->
-    <div class="w-full md:w-3/4">
-      <!-- Search Bar -->
-      <div class="mb-6">
-        <div class="relative">
-          <input 
-            type="text" 
-            [(ngModel)]="searchQuery" 
-            (keyup.enter)="onSearch()"
-            placeholder="Search courses..." 
-            class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-          <button 
-            (click)="onSearch()"
-            class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-blue-600">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-          </button>
+      <!-- Categories Filter -->
+      <div class="filter-group">
+        <h4 class="filter-title">CATEGORIES</h4>
+        <div class="filter-options">
+          <label class="custom-checkbox">
+            <input type="checkbox" [checked]="!selectedCategorySlug" (change)="onCategorySelect(null)">
+            <span class="checkmark"></span>
+            <span class="label-text">All Courses</span>
+          </label>
+          <div *ngFor="let cat of categories">
+            <label class="custom-checkbox">
+              <input type="checkbox" [checked]="selectedCategorySlug === cat.slug" (change)="onCategorySelect(cat.slug)">
+              <span class="checkmark"></span>
+              <span class="label-text">{{ cat.name }}</span>
+            </label>
+            <!-- Subcategories (if any) -->
+            <div *ngIf="cat.children && cat.children.length > 0" class="sub-categories">
+              <label class="custom-checkbox" *ngFor="let child of cat.children">
+                <input type="checkbox" [checked]="selectedCategorySlug === child.slug" (change)="onCategorySelect(child.slug)">
+                <span class="checkmark"></span>
+                <span class="label-text">{{ child.name }}</span>
+              </label>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- Course Grid -->
-      <div *ngIf="loading" class="text-center py-8">
+      <!-- Price Filter -->
+      <div class="filter-group">
+        <h4 class="filter-title">PRICE</h4>
+        <div class="filter-options">
+          <label class="custom-radio">
+            <input type="radio" name="price" [checked]="priceFilter === 'all'" (change)="updatePriceFilter('all')">
+            <span class="radiomark"></span>
+            <span class="label-text">All</span>
+          </label>
+          <label class="custom-radio">
+            <input type="radio" name="price" [checked]="priceFilter === 'free'" (change)="updatePriceFilter('free')">
+            <span class="radiomark"></span>
+            <span class="label-text">Free</span>
+          </label>
+          <label class="custom-radio">
+            <input type="radio" name="price" [checked]="priceFilter === 'paid'" (change)="updatePriceFilter('paid')">
+            <span class="radiomark"></span>
+            <span class="label-text">Paid</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Levels Filter -->
+      <div class="filter-group">
+        <h4 class="filter-title">LEVELS</h4>
+        <div class="filter-options">
+          <label class="custom-checkbox">
+            <input type="checkbox" [(ngModel)]="levelFilter['Beginner']" (change)="applyClientFilters()">
+            <span class="checkmark"></span>
+            <span class="label-text">Beginner</span>
+          </label>
+          <label class="custom-checkbox">
+            <input type="checkbox" [(ngModel)]="levelFilter['Intermediate']" (change)="applyClientFilters()">
+            <span class="checkmark"></span>
+            <span class="label-text">Intermediate</span>
+          </label>
+          <label class="custom-checkbox">
+            <input type="checkbox" [(ngModel)]="levelFilter['Expert']" (change)="applyClientFilters()">
+            <span class="checkmark"></span>
+            <span class="label-text">Expert</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Ratings Filter -->
+      <div class="filter-group">
+        <h4 class="filter-title">RATINGS</h4>
+        <div class="filter-options">
+          <label class="custom-checkbox">
+            <input type="checkbox" [checked]="ratingFilter === 4.5" (change)="updateRatingFilter(4.5)">
+            <span class="checkmark"></span>
+            <span class="label-text">4.5 & up <i class="fas fa-star text-yellow-400"></i></span>
+          </label>
+          <label class="custom-checkbox">
+            <input type="checkbox" [checked]="ratingFilter === 4.0" (change)="updateRatingFilter(4.0)">
+            <span class="checkmark"></span>
+            <span class="label-text">4.0 & up <i class="fas fa-star text-yellow-400"></i></span>
+          </label>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <div class="catalog-header">
+        <div class="header-top">
+          <h1>Course Catalog</h1>
+          <div class="sort-wrapper">
+            <label>SORT BY</label>
+            <select [(ngModel)]="sortBy" (change)="applyClientFilters()" class="sort-select">
+              <option value="most-popular">Most Popular</option>
+              <option value="newest">Newest</option>
+              <option value="highest-rated">Highest Rated</option>
+            </select>
+          </div>
+        </div>
+        <p class="results-count">Found {{ filteredCourses.length }} courses for you</p>
+        
+        <div class="tabs-nav">
+          <button [class.active]="activeTab === 'all'" (click)="setActiveTab('all')">All Courses</button>
+          <button [class.active]="activeTab === 'top-rated'" (click)="setActiveTab('top-rated')">Top Rated</button>
+          <button [class.active]="activeTab === 'newest'" (click)="setActiveTab('newest')">Newest</button>
+          <button [class.active]="activeTab === 'best-sellers'" (click)="setActiveTab('best-sellers')">Best Sellers</button>
+        </div>
+      </div>
+
+      <!-- Loading State -->
+      <div *ngIf="loading" class="loading-state">
+        <div class="spinner"></div>
         <p>Loading courses...</p>
       </div>
 
-      <div *ngIf="!loading && courses.length === 0" class="text-center py-8 bg-white rounded-lg shadow">
-        <p class="text-gray-500">No courses found matching your criteria.</p>
-        <button (click)="onCategorySelect(null); searchQuery=''; onSearch()" class="mt-4 text-blue-600 hover:underline">Clear filters</button>
+      <!-- Empty State -->
+      <div *ngIf="!loading && filteredCourses.length === 0" class="empty-state">
+        <img src="assets/images/no-results.svg" alt="No results" onerror="this.style.display='none'">
+        <h3>No courses found</h3>
+        <p>Try adjusting your filters or search query.</p>
+        <button (click)="onCategorySelect(null); searchQuery=''; priceFilter='all'; ratingFilter=null; applyClientFilters()" class="btn-reset">Clear all filters</button>
       </div>
 
-      <div *ngIf="!loading && courses.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        <app-course-card *ngFor="let course of courses" [course]="course"></app-course-card>
+      <!-- Course Grid -->
+      <div *ngIf="!loading && filteredCourses.length > 0" class="course-grid">
+        <app-course-card *ngFor="let course of filteredCourses" [course]="course"></app-course-card>
       </div>
-    </div>
+
+      <!-- Pagination -->
+      <div class="pagination" *ngIf="!loading && filteredCourses.length > 0">
+        <button class="page-btn prev" disabled><i class="fas fa-chevron-left"></i></button>
+        <button class="page-btn active">1</button>
+        <button class="page-btn">2</button>
+        <button class="page-btn">3</button>
+        <span class="dots">...</span>
+        <button class="page-btn">42</button>
+        <button class="page-btn next"><i class="fas fa-chevron-right"></i></button>
+      </div>
+    </main>
   </div>
 </div>

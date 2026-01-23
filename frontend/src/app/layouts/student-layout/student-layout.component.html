@@ -3,25 +3,58 @@
     <div class="container">
       <div class="logo-area">
         <a routerLink="/" class="logo">
-          <div class="logo-icon">LMS</div>
-          <span class="lms-name">Learning Platform</span>
+          <div class="logo-icon"><i class="fas fa-graduation-cap"></i></div>
+          <span class="lms-name">EduLearn</span>
         </a>
       </div>
 
+      <nav class="nav-menu desktop-only">
+        <ul>
+          <li><a routerLink="/home" routerLinkActive="active">Home</a></li>
+          <li><a routerLink="/courses" routerLinkActive="active">Explore</a></li>
+          <li *ngIf="user"><a routerLink="/my-learning" routerLinkActive="active">My Learning</a></li>
+          <li *ngIf="user"><a routerLink="/profile" routerLinkActive="active">Profile</a></li>
+        </ul>
+      </nav>
+
       <div class="search-container desktop-only">
         <form class="search-form" (ngSubmit)="submitSearch()">
+          <i class="fas fa-search search-icon-input"></i>
           <input
             type="search"
             class="search-input"
-            placeholder="Tìm khóa học, chủ đề..."
+            placeholder="Quick search"
             [(ngModel)]="searchQuery"
             name="headerSearch"
-            aria-label="Tìm kiếm khóa học"
+            aria-label="Quick search"
           />
-          <button type="submit" class="search-button">
-            <span class="search-icon"></span>
-          </button>
         </form>
+      </div>
+
+      <div class="user-actions desktop-only">
+        <ng-container *ngIf="!user">
+          <a routerLink="/auth/login" class="nav-link">Login</a>
+          <a routerLink="/auth/register" class="btn-register">Join for Free</a>
+        </ng-container>
+
+        <div class="user-profile" *ngIf="user" (click)="toggleUserDropdown()">
+          <div class="user-avatar">
+            <img *ngIf="user.avatar" [src]="user.avatar" alt="User">
+            <span *ngIf="!user.avatar">{{ user.name.charAt(0) }}</span>
+          </div>
+          
+          <div class="dropdown-menu" *ngIf="isUserDropdownOpen">
+            <div class="dropdown-header">
+              <span class="user-name">{{ user.name }}</span>
+              <span class="user-email">{{ user.email }}</span>
+            </div>
+            <a *ngIf="user.role === 'admin'" routerLink="/admin/dashboard" (click)="isUserDropdownOpen = false">Admin Dashboard</a>
+            <a routerLink="/profile" (click)="isUserDropdownOpen = false">Profile</a>
+            <a routerLink="/my-learning" (click)="isUserDropdownOpen = false">My Learning</a>
+            <div class="dropdown-divider"></div>
+            <button (click)="logout()" class="logout-btn">Logout</button>
+          </div>
+        </div>
       </div>
 
       <button class="mobile-menu-btn" [class.active]="isMenuOpen" (click)="toggleMenu()" aria-label="Toggle navigation">
@@ -30,64 +63,41 @@
         <span class="bar"></span>
       </button>
 
-      <nav class="nav-menu" [class.active]="isMenuOpen">
-        <ul>
-          <li class="mobile-only mobile-search-item">
+      <!-- Mobile Menu -->
+      <div class="mobile-nav-overlay" *ngIf="isMenuOpen" (click)="isMenuOpen = false"></div>
+      <nav class="mobile-nav-menu" [class.active]="isMenuOpen">
+        <div class="mobile-nav-header">
+          <span class="mobile-logo">EduLearn</span>
+          <button class="close-btn" (click)="isMenuOpen = false">&times;</button>
+        </div>
+        
+        <ul class="mobile-nav-list">
+          <li class="mobile-search-item">
             <form class="mobile-search-form" (ngSubmit)="submitSearch()">
               <input
                 type="search"
                 class="mobile-search-input"
-                placeholder="Tìm khóa học..."
+                placeholder="Quick search"
                 [(ngModel)]="searchQuery"
                 name="headerSearchMobile"
-                aria-label="Tìm kiếm khóa học"
               />
-              <button type="submit" class="mobile-search-button">Tìm</button>
+              <button type="submit" class="mobile-search-button"><i class="fas fa-search"></i></button>
             </form>
           </li>
           <li><a routerLink="/home" routerLinkActive="active" (click)="isMenuOpen = false">Home</a></li>
-          <li><a routerLink="/browse" routerLinkActive="active" (click)="isMenuOpen = false">Browse</a></li>
-          <li><a routerLink="/courses" routerLinkActive="active" (click)="isMenuOpen = false">Courses</a></li>
+          <li><a routerLink="/courses" routerLinkActive="active" (click)="isMenuOpen = false">Explore</a></li>
           <li *ngIf="user"><a routerLink="/my-learning" routerLinkActive="active" (click)="isMenuOpen = false">My Learning</a></li>
-
+          <li *ngIf="user"><a routerLink="/profile" routerLinkActive="active" (click)="isMenuOpen = false">Profile</a></li>
+          
+          <li class="divider" *ngIf="user"></li>
+          <li *ngIf="user && user.role === 'admin'"><a routerLink="/admin/dashboard" (click)="isMenuOpen = false">Admin Dashboard</a></li>
+          <li *ngIf="user"><button (click)="logout()" class="mobile-logout-btn">Logout</button></li>
+          
           <ng-container *ngIf="!user">
-            <li>
-              <a
-                routerLink="/auth/login"
-                routerLinkActive="active"
-                (click)="isMenuOpen = false"
-              >
-                Login
-              </a>
-            </li>
-            <li>
-              <a
-                routerLink="/auth/register"
-                (click)="isMenuOpen = false"
-              >
-                Register
-              </a>
-            </li>
+            <li class="divider"></li>
+            <li><a routerLink="/auth/login" (click)="isMenuOpen = false">Login</a></li>
+            <li><a routerLink="/auth/register" (click)="isMenuOpen = false">Register</a></li>
           </ng-container>
-
-          <!-- Desktop User Dropdown -->
-          <li class="user-menu-item desktop-only" *ngIf="user">
-            <div class="user-dropdown-trigger" (click)="toggleUserDropdown()">
-              <span class="user-name">{{ user?.name || 'User' }}</span>
-              <div class="user-avatar">{{ user?.name?.charAt(0) || 'U' }}</div>
-            </div>
-            
-            <div class="dropdown-menu" *ngIf="isUserDropdownOpen">
-              <a *ngIf="user?.role === 'admin'" routerLink="/admin/dashboard" (click)="isUserDropdownOpen = false; isMenuOpen = false">Admin Dashboard</a>
-              <a routerLink="/profile" (click)="isUserDropdownOpen = false; isMenuOpen = false">Profile</a>
-              <button (click)="logout()" class="logout-btn">Logout</button>
-            </div>
-          </li>
-
-          <!-- Mobile User Links -->
-          <li class="mobile-only" *ngIf="user?.role === 'admin'"><a routerLink="/admin/dashboard" routerLinkActive="active" (click)="isMenuOpen = false">Admin Dashboard</a></li>
-          <li class="mobile-only"><a routerLink="/profile" routerLinkActive="active" (click)="isMenuOpen = false">Profile</a></li>
-          <li class="mobile-only"><button (click)="logout()" class="mobile-logout-btn">Logout</button></li>
         </ul>
       </nav>
     </div>

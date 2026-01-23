@@ -14,7 +14,7 @@
   </div>
 
   <div class="course-grid" *ngIf="filteredCourses.length > 0">
-    <div class="course-card" *ngFor="let course of filteredCourses">
+    <div class="course-card" *ngFor="let course of filteredCourses" [routerLink]="['/courses', course.id]">
       <div class="card-header">
         <h3>{{ course.title }}</h3>
         <span class="price">${{ course.price }}</span>
@@ -26,7 +26,7 @@
       </div>
 
       <div class="card-footer">
-        <button class="btn btn-primary" (click)="enroll(course.id)">Enroll Now</button>
+        <button class="btn btn-primary" (click)="$event.stopPropagation(); enroll(course.id)">Enroll Now</button>
       </div>
     </div>
   </div>

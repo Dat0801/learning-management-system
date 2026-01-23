@@ -31,6 +31,26 @@ export class CourseDetailComponent implements OnInit {
   submittingReview = false;
   currentUser: any = null;
 
+  // UI Controls
+  activeTab: string = 'about';
+  
+  // Mock Data for UI
+  whatYouWillLearn: string[] = [
+    'Build powerful, fast, user-friendly and reactive web apps',
+    'Provide amazing user experiences by leveraging React',
+    'Learn Hooks, Redux, Context API and React Router',
+    'Deploy applications to production environments',
+    'Become a fluent React developer'
+  ];
+
+  courseIncludes = [
+    { icon: 'fas fa-video', text: '32.5 hours on-demand video' },
+    { icon: 'fas fa-file', text: '18 downloadable resources' },
+    { icon: 'fas fa-infinity', text: 'Full lifetime access' },
+    { icon: 'fas fa-mobile-alt', text: 'Access on mobile and TV' },
+    { icon: 'fas fa-certificate', text: 'Certificate of completion' }
+  ];
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -53,6 +73,31 @@ export class CourseDetailComponent implements OnInit {
     ).subscribe({
       next: (response: any) => {
         this.course = response.data || response;
+        
+        // Mock additional data if missing
+        if (this.course) {
+          if (!this.course.instructor) {
+            this.course.instructor = {
+              id: 999,
+              email: 'alex@example.com',
+              name: 'Alex Rivers',
+              headline: 'Senior Full-Stack Developer & Technical Educator',
+              avatar: undefined, // use placeholder
+              average_rating: 4.8,
+              students_count: 842431,
+              courses_count: 18,
+              bio: 'Alex is a seasoned web developer with over 10 years of experience building scalable applications for startups and enterprise giants alike. He has been teaching React since its early beta days and has a passion for simplifying complex topics.'
+            };
+          }
+          
+          // Add other mock stats
+          this.course.rating = this.course.rating || 4.8;
+          this.course.rating_count = this.course.rating_count || 12543;
+          this.course.enrollments_count = this.course.enrollments_count || 154230;
+          this.course.last_updated = this.course.last_updated || new Date().toISOString();
+          this.course.language = this.course.language || 'English [CC]';
+        }
+
         this.determineLessonStatus();
         this.loading = false;
         if (this.course) {
@@ -74,6 +119,10 @@ export class CourseDetailComponent implements OnInit {
         this.isInWishlist = ids.includes(this.course.id);
       }
     });
+  }
+
+  setActiveTab(tab: string) {
+    this.activeTab = tab;
   }
 
   toggleWishlist() {

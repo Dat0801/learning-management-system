@@ -1,0 +1,86 @@
+<div class="page-container">
+  <div class="header-section">
+    <div class="header-content">
+      <h1>My Learning</h1>
+      <p class="welcome-text">Welcome back, {{ (authService.user$ | async)?.name || 'Student' }}. Pick up where you left off.</p>
+    </div>
+    <button class="btn-explore" routerLink="/courses">Explore Courses</button>
+  </div>
+
+  <div class="tabs-container">
+    <button class="tab-btn" [class.active]="activeTab === 'active'" (click)="setActiveTab('active')">
+      <i class="fas fa-play-circle"></i> Active Courses
+    </button>
+    <button class="tab-btn" [class.active]="activeTab === 'completed'" (click)="setActiveTab('completed')">
+      <i class="fas fa-check-circle"></i> Completed
+    </button>
+  </div>
+
+  <div class="filter-section">
+    <div class="search-wrapper">
+      <i class="fas fa-search search-icon"></i>
+      <input type="text" placeholder="Filter your current courses..." [(ngModel)]="searchQuery" (input)="filterCourses()">
+      <button class="filter-btn">
+        <i class="fas fa-sliders-h"></i>
+      </button>
+    </div>
+  </div>
+
+  <div class="loading-spinner" *ngIf="isLoading">
+    <div class="spinner"></div>
+    <p>Loading your courses...</p>
+  </div>
+
+  <div class="empty-state" *ngIf="!isLoading && filteredCourses.length === 0">
+    <div class="empty-icon">
+      <i class="fas fa-book-reader"></i>
+    </div>
+    <h3>No courses found</h3>
+    <p *ngIf="courses.length === 0">You haven't enrolled in any courses yet.</p>
+    <p *ngIf="courses.length > 0">No courses match your search.</p>
+    <button *ngIf="courses.length === 0" routerLink="/courses" class="btn-primary">Browse Courses</button>
+  </div>
+
+  <div class="course-list" *ngIf="!isLoading && filteredCourses.length > 0">
+    <div class="course-card-horizontal" *ngFor="let course of filteredCourses">
+      <div class="card-thumbnail" [routerLink]="['/courses', course.id]">
+        <img [src]="course.thumbnail || 'assets/images/course-placeholder.jpg'" [alt]="course.title">
+        <div class="overlay"></div>
+      </div>
+      
+      <div class="card-content">
+        <div class="card-header">
+          <div class="status-badge" [ngClass]="{'completed': course.progress === 100, 'active': course.progress < 100}">
+            {{ course.progress === 100 ? 'COMPLETED' : 'ACTIVE' }}
+          </div>
+          <span class="last-updated" *ngIf="course.last_accessed">Updated {{ course.last_accessed | date:'mediumDate' }}</span>
+          <span class="last-updated" *ngIf="!course.last_accessed">Last active today</span>
+        </div>
+
+        <h3 class="course-title" [routerLink]="['/courses', course.id]">{{ course.title }}</h3>
+        <p class="instructor">Instructor: {{ course.instructor?.name || 'Unknown' }}</p>
+
+        <div class="progress-section">
+          <div class="progress-info">
+            <span class="label">Progress</span>
+            <span class="percentage">{{ course.progress || 0 }}%</span>
+          </div>
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" [style.width.%]="course.progress || 0"></div>
+          </div>
+        </div>
+
+        <div class="card-footer">
+          <div class="lesson-count">
+            <i class="fas fa-book-open"></i>
+            <span>{{ course.completed_lessons_count || 0 }} / {{ course.lessons_count || 0 }} Lessons</span>
+          </div>
+          <button class="btn-action" [routerLink]="['/courses', course.id]">
+            <i class="fas" [ngClass]="course.progress === 100 ? 'fa-redo' : 'fa-play'"></i>
+            {{ course.progress === 100 ? 'Review Course' : 'Continue Learning' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

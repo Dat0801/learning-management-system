@@ -14,6 +14,13 @@ export interface User {
   id: number;
   name: string;
   email: string;
+  bio?: string;
+  headline?: string;
+  avatar?: string;
+  average_rating?: number;
+  reviews_count?: number;
+  students_count?: number;
+  courses_count?: number;
 }
 
 export interface Course {
@@ -27,4 +34,9 @@ export interface Course {
   lessons?: Lesson[];
   is_enrolled?: boolean;
   enrollments_count?: number;
+  rating?: number;
+  rating_count?: number;
+  last_updated?: string;
+  language?: string;
+  duration?: string;
 }
