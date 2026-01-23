@@ -1,209 +1,706 @@
-.course-detail-container {
-  padding-bottom: 4rem;
+// Colors & Variables
+$text-main: #2d2f31;
+$text-muted: #6a6f73;
+$primary: #0056d2; // Udemy-like blue
+$primary-hover: #0043a5;
+$accent: #a435f0; // Udemy-like purple for some elements
+$border-color: #d1d7dc;
+$light-bg: #f7f9fa;
+$white: #ffffff;
+$black: #1c1d1f;
+
+.course-page-wrapper {
+  color: $text-main;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: $white;
 }
 
-.course-header {
-  background: radial-gradient(circle at top left, #60a5fa 0%, #2563eb 40%, #1d4ed8 80%);
-  color: white;
-  padding: 3rem 2rem;
-  border-radius: 0 0 1.25rem 1.25rem;
-  margin-bottom: 2rem;
+.container {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
 
-  .header-content {
-    max-width: 800px;
-    margin: 0 auto;
-  }
+// Hero Section
+.course-hero-section {
+  background-color: $black;
+  color: $white;
+  padding: 32px 0;
+  position: relative;
+  
+  .hero-content {
+    max-width: 700px; // Leave space for sidebar on large screens
+    
+    .breadcrumbs {
+      font-size: 14px;
+      color: #cec0fc; // Light purple/blue tint
+      margin-bottom: 16px;
+      font-weight: 600;
+      
+      a {
+        color: inherit;
+        text-decoration: none;
+        &:hover { text-decoration: underline; }
+      }
+      
+      .separator { margin: 0 8px; font-size: 12px; }
+      .current { color: $white; pointer-events: none; }
+    }
 
-  h1 {
-    font-size: 2.5rem;
-    margin-bottom: 1rem;
-  }
+    h1 {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      line-height: 1.2;
+    }
 
-  .description {
-    font-size: 1.1rem;
-    line-height: 1.6;
-    margin-bottom: 1.5rem;
-    color: rgba(249, 250, 251, 0.85);
-  }
+    .subtitle {
+      font-size: 19px;
+      margin-bottom: 16px;
+      line-height: 1.4;
+    }
 
-  .badge {
-    background-color: #bbf7d0;
-    color: #166534;
-    padding: 0.25rem 0.5rem;
-    border-radius: 4px;
-    font-size: 0.8rem;
-    text-transform: uppercase;
-    margin-bottom: 1rem;
-    display: inline-block;
-  }
-
-  .instructor-info {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin-bottom: 2rem;
-
-    .avatar-placeholder {
-      width: 40px;
-      height: 40px;
-      background-color: rgba(15, 23, 42, 0.5);
-      border-radius: 50%;
+    .course-meta {
       display: flex;
       align-items: center;
-      justify-content: center;
-      font-weight: bold;
-      color: white;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 16px;
+      font-size: 14px;
+
+      .badge {
+        background-color: #eceb98;
+        color: #3d3c0a;
+        font-weight: 700;
+        padding: 4px 8px;
+        border-radius: 2px;
+        text-transform: uppercase;
+        font-size: 12px;
+        
+        &.bestseller { background-color: #eceb98; color: #3d3c0a; }
+      }
+
+      .rating {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        
+        .score {
+          font-weight: 700;
+          color: #f3ca8c;
+        }
+
+        .stars {
+          color: #f3ca8c;
+          font-size: 12px;
+          i { margin-right: 1px; }
+          i:not(.filled) { color: #6a6f73; } // Muted star color on dark bg
+        }
+        
+        .count {
+          color: #cec0fc;
+          text-decoration: underline;
+          cursor: pointer;
+        }
+      }
+
+      .students {
+        color: $white;
+      }
+    }
+
+    .created-by {
+      font-size: 14px;
+      margin-bottom: 16px;
+      
+      a {
+        color: #cec0fc;
+        text-decoration: underline;
+        &:hover { color: $white; }
+      }
+    }
+
+    .last-updated {
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      
+      .icon { margin-right: 4px; }
+      .lang { margin-left: 8px; }
+    }
+  }
+}
+
+// Layout Grid
+.course-body {
+  padding-top: 32px;
+  padding-bottom: 64px;
+
+  .grid-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 32px;
+    position: relative;
+
+    @media (min-width: 992px) {
+      grid-template-columns: 2fr 1fr;
+    }
+  }
+}
+
+// Main Content (Left)
+.main-column {
+  
+  // Tabs
+  .course-tabs {
+    display: flex;
+    gap: 24px;
+    border-bottom: 1px solid $border-color;
+    margin-bottom: 32px;
+    
+    button {
+      background: none;
+      border: none;
+      font-size: 16px;
+      font-weight: 700;
+      color: $text-muted;
+      padding-bottom: 12px;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      
+      &.active {
+        color: $text-main;
+        border-bottom-color: $text-main;
+      }
+      
+      &:hover:not(.active) {
+        color: $text-main;
+      }
     }
   }
 
-    .actions {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
+  h2 {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 24px;
+    color: $text-main;
+  }
 
-    button {
-      padding: 0.75rem 2rem;
-      border-radius: 6px;
-      font-weight: 600;
-      cursor: pointer;
-      font-size: 1rem;
-      border: none;
-      
-      &.btn-primary {
-        background-color: var(--primary-color);
-        color: #ffffff;
-        &:hover { background-color: var(--primary-color-hover); }
-      }
+  section {
+    margin-bottom: 48px;
+  }
 
-      &.btn-secondary {
-        background-color: #ffffff;
-        color: #111827;
-        &:hover { background-color: #f9fafb; }
+  // What you'll learn
+  .what-you-learn {
+    border: 1px solid $border-color;
+    padding: 24px;
+    background-color: $white;
+    
+    .learning-points-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      
+      @media (min-width: 768px) {
+        grid-template-columns: 1fr 1fr;
       }
       
-      &.btn-wishlist {
-        padding: 0.75rem;
-        background-color: rgba(255, 255, 255, 0.2);
-        color: white;
-        font-size: 1.5rem;
-        line-height: 1;
+      .point {
         display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: all 0.2s;
+        align-items: flex-start;
+        gap: 12px;
+        font-size: 14px;
+        color: $text-main;
         
-        &:hover {
-          background-color: rgba(255, 255, 255, 0.3);
-          transform: scale(1.05);
+        i {
+          color: $text-main;
+          margin-top: 3px;
+          font-size: 12px;
+        }
+      }
+    }
+  }
+
+  // Course Content
+  .course-content-section {
+    .content-stats {
+      font-size: 14px;
+      color: $text-main;
+      margin-bottom: 16px;
+    }
+
+    .curriculum-accordion {
+      border: 1px solid $border-color;
+      border-bottom: none; // Last item will have border
+
+      .section-item {
+        border-bottom: 1px solid $border-color;
+        
+        .section-header {
+          background-color: $light-bg;
+          padding: 16px;
+          display: flex;
+          align-items: center;
+          cursor: pointer;
+          
+          .toggle-icon { margin-right: 12px; font-size: 12px; }
+          
+          h3 {
+            font-size: 16px;
+            font-weight: 700;
+            margin: 0;
+            flex-grow: 1;
+          }
+          
+          .meta { font-size: 14px; color: $text-main; }
+        }
+
+        .section-body {
+          .lesson-row {
+            padding: 14px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: $white;
+            border-top: 1px solid $border-color; // Separator between lessons
+            font-size: 14px;
+            position: relative;
+            
+            &.locked {
+              color: $text-muted;
+              i { color: $text-muted; }
+            }
+
+            .lesson-left {
+              display: flex;
+              align-items: center;
+              gap: 12px;
+              
+              i { 
+                font-size: 12px; 
+                width: 16px;
+                text-align: center;
+                &.completed { color: #166534; } // Green for checkmark
+              }
+            }
+
+            .lesson-right {
+              display: flex;
+              align-items: center;
+              gap: 16px;
+              
+              .preview-text {
+                color: $primary;
+                text-decoration: underline;
+                font-weight: 500;
+              }
+              
+              .duration { color: $text-muted; }
+            }
+            
+            .lesson-link-overlay {
+              position: absolute;
+              top: 0; left: 0; right: 0; bottom: 0;
+              cursor: pointer;
+              z-index: 1;
+            }
+            
+            &:hover {
+              background-color: rgba($primary, 0.05);
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  // Description
+  .description-section {
+    font-size: 14px;
+    line-height: 1.6;
+    color: $text-main;
+  }
+
+  // Instructor
+  .instructor-section {
+    .instructor-profile {
+      h3 {
+        font-size: 19px;
+        margin-bottom: 4px;
+        a { color: $primary; text-decoration: underline; font-weight: 700; }
+      }
+      
+      .instructor-title {
+        color: $text-muted;
+        margin-bottom: 16px;
+      }
+      
+      .instructor-stats {
+        display: flex;
+        gap: 24px;
+        margin-bottom: 16px;
+        
+        .stat {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-size: 14px;
+          color: $text-main;
+          i { color: $text-main; }
+        }
+      }
+      
+      .instructor-bio {
+        display: flex;
+        gap: 16px;
+        font-size: 14px;
+        line-height: 1.6;
+        
+        img {
+          width: 96px;
+          height: 96px;
+          border-radius: 50%;
+          object-fit: cover;
+        }
+      }
+    }
+  }
+
+  // Reviews
+  .feedback-section {
+    .feedback-grid {
+      display: flex;
+      gap: 32px;
+      align-items: flex-start;
+      margin-bottom: 24px;
+      
+      .rating-summary {
+        text-align: center;
+        color: #b4690e; // Udemy orange/brown
+        
+        .big-rating {
+          font-size: 64px;
+          font-weight: 700;
+          line-height: 1;
+        }
+        
+        .stars {
+          margin: 8px 0;
+          color: #e59819;
+          font-size: 14px;
+          i:not(.filled) { color: #d1d7dc; }
+        }
+        
+        .rating-text {
+          font-weight: 700;
+          color: #b4690e;
+          font-size: 14px;
+        }
+      }
+      
+      .rating-bars {
+        flex-grow: 1;
+        
+        .bar-row {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          margin-bottom: 8px;
+          
+          .progress-bar {
+            flex-grow: 1;
+            height: 8px;
+            background-color: #d1d7dc;
+            
+            .fill {
+              height: 100%;
+              background-color: $text-muted;
+            }
+          }
+          
+          .stars-row {
+            display: flex;
+            gap: 2px;
+            font-size: 12px;
+            color: #e59819;
+            i:not(.filled) { color: #d1d7dc; }
+            width: 80px;
+          }
+          
+          .percent {
+            font-size: 14px;
+            color: $primary;
+            text-decoration: underline;
+            width: 32px;
+            text-align: right;
+          }
+        }
+      }
+    }
+
+    .reviews-list {
+      .review-item {
+        padding: 24px 0;
+        border-top: 1px solid $border-color;
+        
+        .review-header {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          margin-bottom: 16px;
+          
+          .user-avatar {
+            width: 40px;
+            height: 40px;
+            background-color: $text-main;
+            color: $white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+          }
+          
+          .user-info {
+            .name { font-weight: 700; font-size: 16px; margin-bottom: 2px; }
+            .review-stars {
+              font-size: 12px;
+              color: #e59819;
+              i:not(.filled) { color: #d1d7dc; }
+            }
+          }
+          
+          .time {
+            margin-left: auto;
+            color: $text-muted;
+            font-size: 14px;
+          }
+        }
+        
+        .review-content {
+          color: $text-main;
+          font-size: 14px;
+          line-height: 1.5;
         }
       }
     }
   }
 }
 
-.main-content {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 0 2rem;
-
-  h2 {
-    font-size: 1.5rem;
-    margin-bottom: 1rem;
-    border-bottom: 2px solid #eee;
-    padding-bottom: 0.5rem;
+// Sidebar (Right)
+.sidebar-column {
+  // This helps with sticky positioning relative to container
+  
+  .sidebar-content {
+    position: sticky;
+    top: 20px;
+    z-index: 10;
+    // Overlap the hero section? 
+    // The design has it overlapping.
+    // To achieve overlap, we might need negative margin on the sidebar itself
+    // But since they are in different containers (Hero vs Body), we can just pull it up?
+    // Actually, in the HTML structure I put hero outside container. 
+    // To make sidebar overlap hero, it needs to be higher up.
+    // For now, let's keep it simple: just sticky in its column.
   }
-
-  section {
-    margin-bottom: 3rem;
+  
+  .preview-card {
+    background-color: $white;
+    border: 1px solid $white; // Or shadow
+    box-shadow: 0 2px 4px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.08);
+    // If we want overlap:
+    // margin-top: -200px; // Example
+    
+    .video-thumbnail {
+      position: relative;
+      cursor: pointer;
+      
+      .thumbnail-placeholder {
+        width: 100%;
+        padding-top: 56.25%; // 16:9
+        background-color: $black;
+        background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)); // Placeholder
+      }
+      
+      .play-overlay {
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: $white;
+        z-index: 2;
+        
+        .play-icon {
+          width: 64px;
+          height: 64px;
+          background-color: $white;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin-bottom: 16px;
+          
+          i { 
+            color: $black; 
+            font-size: 24px; 
+            margin-left: 4px; // Optical center
+          }
+        }
+        
+        span {
+          font-weight: 700;
+          font-size: 16px;
+          text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+      }
+    }
+    
+    .sidebar-body {
+      padding: 24px;
+      
+      .price-area {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 24px;
+        
+        .current-price {
+          font-size: 32px;
+          font-weight: 700;
+          color: $text-main;
+        }
+        
+        .original-price {
+          text-decoration: line-through;
+          color: $text-muted;
+          font-size: 16px;
+        }
+        
+        .discount {
+          font-size: 16px;
+          color: $text-main;
+          font-weight: 600;
+        }
+      }
+      
+      .action-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-bottom: 24px;
+        
+        button {
+          width: 100%;
+          height: 48px;
+          font-weight: 700;
+          font-size: 16px;
+          cursor: pointer;
+          border: 1px solid transparent;
+        }
+        
+        .btn-add-cart {
+          background-color: $primary;
+          color: $white;
+          &:hover { background-color: $primary-hover; }
+        }
+        
+        .btn-buy-now {
+          background-color: $white;
+          color: $text-main;
+          border-color: $text-main;
+          &:hover { background-color: rgba($black, 0.05); }
+        }
+        
+        .guarantee {
+          text-align: center;
+          font-size: 12px;
+          color: $text-muted;
+          margin-top: 8px;
+        }
+      }
+      
+      .includes-list {
+        margin-bottom: 24px;
+        
+        h4 {
+          font-size: 16px;
+          font-weight: 700;
+          margin-bottom: 12px;
+        }
+        
+        ul {
+          list-style: none;
+          padding: 0;
+          margin: 0;
+          
+          li {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: $text-main;
+            
+            i {
+              width: 16px;
+              text-align: center;
+              font-size: 14px;
+            }
+          }
+        }
+      }
+      
+      .sidebar-footer {
+        display: flex;
+        justify-content: space-between;
+        
+        .btn-text {
+          background: none;
+          border: none;
+          color: $text-main;
+          font-weight: 600;
+          font-size: 14px;
+          text-decoration: underline;
+          cursor: pointer;
+          &:hover { color: $text-muted; }
+        }
+      }
+    }
   }
 }
 
-.video-placeholder {
-  width: 100%;
-  aspect-ratio: 16/9;
-  background-color: #000;
-  border-radius: 8px;
+// Media Query for Sidebar Overlap (Optional refinement)
+@media (min-width: 992px) {
+  .sidebar-column .preview-card {
+    // If we wanted to pull it up into the hero area
+    // margin-top: -200px; 
+    // But we need to handle z-indexing and layout flow carefully.
+    // For now, let's stick to standard layout.
+  }
+}
+
+.loading-spinner {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  color: white;
-  cursor: pointer;
-
-  .play-button {
-    font-size: 3rem;
-    margin-bottom: 1rem;
+  height: 400px;
+  
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba($primary, 0.1);
+    border-left-color: $primary;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 16px;
   }
 }
 
-.lesson-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-
-  .lesson-item {
-    display: flex;
-    align-items: center;
-    padding: 1rem;
-    background-color: white;
-    border: 1px solid #eee;
-    border-radius: 6px;
-    transition: all 0.2s;
-
-    &:hover {
-      background-color: #f9f9f9;
-    }
-
-    &.completed {
-      border-left: 4px solid #4caf50;
-      .status-icon { color: #4caf50; }
-    }
-
-    &.current {
-      border-left: 4px solid #3f51b5;
-      background-color: #f0f4ff;
-      .status-icon { color: #3f51b5; }
-    }
-
-    &.locked {
-      opacity: 0.7;
-      background-color: #f5f5f5;
-      .status-icon { color: #999; }
-    }
-
-    .status-icon {
-      width: 40px;
-      display: flex;
-      justify-content: center;
-      font-weight: bold;
-      font-size: 1.2rem;
-    }
-
-    .lesson-info {
-      flex: 1;
-      h3 {
-        margin: 0;
-        font-size: 1rem;
-        font-weight: 500;
-      }
-    }
-
-    .lesson-action {
-      .btn-text {
-        background: none;
-        border: none;
-        color: #3f51b5;
-        font-weight: 600;
-        cursor: pointer;
-        &:hover { text-decoration: underline; }
-      }
-    }
-  }
-}
-
-.loading {
-  text-align: center;
-  padding: 4rem;
-  font-size: 1.2rem;
-  color: #666;
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }

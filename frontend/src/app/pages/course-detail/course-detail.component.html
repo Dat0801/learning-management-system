@@ -1,153 +1,262 @@
-<div class="course-detail-container" *ngIf="course; else loadingTpl">
-  <!-- Hero Section -->
-  <header class="course-header">
-    <div class="header-content">
-      <span class="badge" *ngIf="course.is_enrolled">Enrolled</span>
-      <h1>{{ course.title }}</h1>
-      <p class="description">{{ course.description }}</p>
-      
-      <div class="instructor-info" *ngIf="course.instructor">
-        <div class="avatar-placeholder">{{ course.instructor.name.charAt(0) }}</div>
-        <span>Created by <strong>{{ course.instructor.name }}</strong></span>
-      </div>
+<div class="course-page-wrapper" *ngIf="course; else loadingTpl">
+  
+  <!-- Top Dark Header Area -->
+  <div class="course-hero-section">
+    <div class="container">
+      <div class="hero-content">
+        <!-- Breadcrumbs -->
+        <div class="breadcrumbs">
+          <a routerLink="/">Home</a>
+          <span class="separator">›</span>
+          <a routerLink="/browse">Courses</a>
+          <span class="separator">›</span>
+          <span class="current">{{ course.title }}</span>
+        </div>
 
-      <div class="actions">
-        <button *ngIf="!course.is_enrolled" class="btn-primary" (click)="enroll()">
-          Enroll for ${{ course.price }}
-        </button>
-        <button *ngIf="course.is_enrolled" class="btn-secondary">
-          Continue Learning
-        </button>
-        
-        <button class="btn-wishlist" (click)="toggleWishlist()" [title]="isInWishlist ? 'Remove from wishlist' : 'Add to wishlist'">
-          {{ isInWishlist ? '♥' : '♡' }}
-        </button>
+        <h1>{{ course.title }}</h1>
+        <p class="subtitle">{{ course.description }}</p>
+
+        <div class="course-meta">
+          <span class="badge bestseller" *ngIf="(course.rating || 0) >= 4.5">Bestseller</span>
+          <span class="rating">
+            <span class="score">{{ course.rating }}</span>
+            <span class="stars">
+              <i *ngFor="let star of [1,2,3,4,5]" class="fas fa-star" [class.filled]="star <= (course.rating || 0)"></i>
+            </span>
+            <span class="count">({{ course.rating_count | number }} ratings)</span>
+          </span>
+          <span class="students">{{ course.enrollments_count | number }} students</span>
+        </div>
+
+        <div class="created-by">
+          Created by <a href="#" (click)="$event.preventDefault()">{{ course.instructor?.name || 'Instructor' }}</a>
+        </div>
+
+        <div class="last-updated">
+          <span class="icon"><i class="fas fa-exclamation-circle"></i></span>
+          Last updated {{ course.last_updated | date:'M/yyyy' }}
+          <span class="lang"><i class="fas fa-globe"></i> {{ course.language }}</span>
+        </div>
       </div>
     </div>
-  </header>
+  </div>
 
-  <div class="main-content">
-    <!-- Video Preview Section -->
-    <section class="video-preview">
-      <h2>Course Preview</h2>
-      <div class="video-placeholder">
-        <div class="play-button">▶</div>
-        <p>Video Player Placeholder</p>
-      </div>
-    </section>
-
-    <!-- Curriculum Section -->
-    <section class="curriculum">
-      <h2>Curriculum</h2>
-      <div class="lesson-list">
-        <div 
-          class="lesson-item" 
-          *ngFor="let lesson of course.lessons"
-          [ngClass]="getLessonStatus(lesson)"
-        >
-          <div class="status-icon">
-            <span *ngIf="getLessonStatus(lesson) === 'completed'">✓</span>
-            <span *ngIf="getLessonStatus(lesson) === 'current'">▶</span>
-            <span *ngIf="getLessonStatus(lesson) === 'preview'">👁</span>
-            <span *ngIf="getLessonStatus(lesson) === 'locked'">🔒</span>
-          </div>
-          <div class="lesson-info">
-            <h3>{{ lesson.title }}</h3>
-            <!-- <p class="duration">10:00</p> -->
-            <span *ngIf="lesson.is_preview && !course.is_enrolled" class="text-xs text-blue-500 ml-2">(Preview)</span>
-          </div>
-          <div class="lesson-action">
-            <button 
-              *ngIf="getLessonStatus(lesson) !== 'locked'" 
-              class="btn-text"
-              [routerLink]="['/learning', course.id]"
-              [queryParams]="{lesson: lesson.id}"
-            >
-              {{ getLessonStatus(lesson) === 'completed' ? 'Review' : (getLessonStatus(lesson) === 'preview' ? 'Preview' : 'Start') }}
-            </button>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Reviews Section -->
-    <section class="reviews-section mt-8">
-      <h2 class="text-2xl font-bold mb-4">Reviews & Ratings</h2>
+  <!-- Main Content Area with Sidebar -->
+  <div class="container course-body">
+    <div class="grid-layout">
       
-      <!-- Reviews List -->
-      <div class="reviews-list space-y-4">
-        <div *ngIf="reviews.length === 0" class="text-gray-500">
-          No reviews yet. Be the first to review!
+      <!-- Left Column: Main Content -->
+      <div class="main-column">
+        
+        <!-- Navigation Tabs -->
+        <div class="course-tabs">
+          <button [class.active]="activeTab === 'about'" (click)="setActiveTab('about')">About</button>
+          <button [class.active]="activeTab === 'syllabus'" (click)="setActiveTab('syllabus')">Syllabus</button>
+          <button [class.active]="activeTab === 'instructor'" (click)="setActiveTab('instructor')">Instructor</button>
+          <button [class.active]="activeTab === 'reviews'" (click)="setActiveTab('reviews')">Reviews</button>
         </div>
 
-        <div *ngFor="let review of reviews" class="review-item bg-white p-4 rounded shadow-sm border">
-          <div class="flex items-center justify-between mb-2">
-            <div class="flex items-center gap-2">
-              <div class="font-bold">{{ review.user?.name || 'User' }}</div>
-              <div class="text-yellow-500">
-                <span *ngFor="let i of [1,2,3,4,5]">
-                  {{ i <= review.rating ? '★' : '☆' }}
-                </span>
+        <!-- What you'll learn -->
+        <section class="what-you-learn" *ngIf="activeTab === 'about'">
+          <h2>What you'll learn</h2>
+          <div class="learning-points-grid">
+            <div class="point" *ngFor="let point of whatYouWillLearn">
+              <i class="fas fa-check"></i>
+              <span>{{ point }}</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Course Content (Curriculum) -->
+        <section class="course-content-section" id="syllabus" *ngIf="activeTab === 'about' || activeTab === 'syllabus'">
+          <h2>Course Content</h2>
+          <div class="content-stats">
+            <span>{{ course.lessons?.length || 0 }} lectures</span> • <span>{{ course.duration || '10h 5m' }} total length</span>
+          </div>
+          
+          <div class="curriculum-accordion">
+            <!-- For now, we just list lessons. In a real app, these would be grouped by section -->
+            <div class="section-item">
+              <div class="section-header">
+                <span class="toggle-icon"><i class="fas fa-chevron-down"></i></span>
+                <h3>Course Curriculum</h3>
+                <span class="meta">{{ course.lessons?.length }} lectures</span>
+              </div>
+              <div class="section-body">
+                <div class="lesson-row" *ngFor="let lesson of course.lessons" [class.locked]="!course.is_enrolled && !lesson.is_preview">
+                  <div class="lesson-left">
+                    <i class="fas fa-play-circle" *ngIf="!lesson.is_completed"></i>
+                    <i class="fas fa-check-circle completed" *ngIf="lesson.is_completed"></i>
+                    <span class="lesson-title">{{ lesson.title }}</span>
+                  </div>
+                  <div class="lesson-right">
+                    <span class="preview-text" *ngIf="lesson.is_preview && !course.is_enrolled">Preview</span>
+                    <span class="duration">05:20</span>
+                  </div>
+                  <a *ngIf="course.is_enrolled || lesson.is_preview" 
+                     [routerLink]="['/learning', course.id]" 
+                     [queryParams]="{lesson: lesson.id}"
+                     class="lesson-link-overlay"></a>
+                </div>
               </div>
             </div>
-            <div class="flex items-center gap-2">
-              <div class="text-sm text-gray-500">{{ review.created_at | date }}</div>
-              <button 
-                *ngIf="currentUser && currentUser.id === review.user_id"
-                (click)="deleteReview(review.id)"
-                class="text-red-500 hover:text-red-700 text-sm font-medium"
-                title="Delete your review"
-              >
-                Delete
-              </button>
+          </div>
+        </section>
+
+        <!-- Description -->
+        <section class="description-section" *ngIf="activeTab === 'about'">
+          <h2>Description</h2>
+          <div [innerHTML]="course.description"></div>
+        </section>
+
+        <!-- Instructor -->
+        <section class="instructor-section" id="instructor" *ngIf="activeTab === 'about' || activeTab === 'instructor'">
+          <h2>Instructor</h2>
+          <div class="instructor-profile">
+            <h3><a href="#">{{ course.instructor?.name }}</a></h3>
+            <p class="instructor-title">{{ course.instructor?.headline }}</p>
+            
+            <div class="instructor-stats">
+              <div class="stat">
+                <div class="icon"><i class="fas fa-star"></i></div>
+                <div class="text">{{ course.instructor?.average_rating }} Instructor Rating</div>
+              </div>
+              <div class="stat">
+                <div class="icon"><i class="fas fa-medal"></i></div>
+                <div class="text">{{ course.instructor?.students_count | number }} Students</div>
+              </div>
+              <div class="stat">
+                <div class="icon"><i class="fas fa-play-circle"></i></div>
+                <div class="text">{{ course.instructor?.courses_count }} Courses</div>
+              </div>
+            </div>
+            
+            <div class="instructor-bio">
+              <p>{{ course.instructor?.bio }}</p>
             </div>
           </div>
-          <p class="text-gray-700">{{ review.comment }}</p>
+        </section>
+
+        <!-- Student Feedback -->
+        <section class="feedback-section" id="reviews" *ngIf="activeTab === 'about' || activeTab === 'reviews'">
+          <h2>Student Feedback</h2>
+          <div class="feedback-grid">
+            <div class="rating-summary">
+              <div class="big-rating">{{ course.rating }}</div>
+              <div class="stars">
+                <i *ngFor="let star of [1,2,3,4,5]" class="fas fa-star" [class.filled]="star <= (course.rating || 0)"></i>
+              </div>
+              <div class="rating-text">Course Rating</div>
+            </div>
+            
+            <div class="rating-bars">
+              <div class="bar-row">
+                <div class="progress-bar"><div class="fill" style="width: 70%"></div></div>
+                <div class="stars-row">
+                  <i *ngFor="let s of [1,2,3,4,5]" class="fas fa-star filled"></i>
+                </div>
+                <span class="percent">70%</span>
+              </div>
+              <div class="bar-row">
+                <div class="progress-bar"><div class="fill" style="width: 22%"></div></div>
+                <div class="stars-row">
+                  <i *ngFor="let s of [1,2,3,4]" class="fas fa-star filled"></i><i class="fas fa-star"></i>
+                </div>
+                <span class="percent">22%</span>
+              </div>
+              <div class="bar-row">
+                <div class="progress-bar"><div class="fill" style="width: 5%"></div></div>
+                <div class="stars-row">
+                  <i *ngFor="let s of [1,2,3]" class="fas fa-star filled"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                </div>
+                <span class="percent">5%</span>
+              </div>
+              <!-- More bars... -->
+            </div>
+          </div>
+
+          <!-- Reviews List -->
+          <div class="reviews-list mt-8">
+            <div *ngFor="let review of reviews" class="review-item">
+              <div class="review-header">
+                <div class="user-avatar">{{ review.user?.name?.charAt(0) || 'U' }}</div>
+                <div class="user-info">
+                  <div class="name">{{ review.user?.name || 'User' }}</div>
+                  <div class="review-stars">
+                    <i *ngFor="let s of [1,2,3,4,5]" class="fas fa-star" [class.filled]="s <= review.rating"></i>
+                  </div>
+                </div>
+                <div class="time">{{ review.created_at | date }}</div>
+              </div>
+              <div class="review-content">{{ review.comment }}</div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+
+      <!-- Right Column: Sidebar (Sticky) -->
+      <div class="sidebar-column">
+        <div class="sidebar-content">
+          <!-- Video Preview -->
+          <div class="preview-card">
+            <div class="video-thumbnail">
+              <div class="play-overlay">
+                <div class="play-icon"><i class="fas fa-play"></i></div>
+                <span>Preview this course</span>
+              </div>
+              <!-- Placeholder image -->
+              <div class="thumbnail-placeholder"></div> 
+            </div>
+            
+            <div class="sidebar-body">
+              <div class="price-area" *ngIf="!course.is_enrolled">
+                <div class="current-price">${{ course.price }}</div>
+                <div class="original-price" *ngIf="course.price > 0">${{ course.price * 1.5 | number:'1.2-2' }}</div>
+                <div class="discount" *ngIf="course.price > 0">43% OFF</div>
+              </div>
+
+              <div class="action-buttons">
+                <ng-container *ngIf="!course.is_enrolled">
+                  <button class="btn-add-cart" (click)="enroll()">Add to Cart</button>
+                  <button class="btn-buy-now" (click)="enroll()">Buy Now</button>
+                </ng-container>
+                
+                <ng-container *ngIf="course.is_enrolled">
+                  <button class="btn-buy-now" [routerLink]="['/learning', course.id]">Go to Course</button>
+                </ng-container>
+
+                <div class="guarantee">30-Day Money-Back Guarantee</div>
+              </div>
+
+              <div class="includes-list">
+                <h4>This course includes:</h4>
+                <ul>
+                  <li *ngFor="let item of courseIncludes">
+                    <i [class]="item.icon"></i>
+                    <span>{{ item.text }}</span>
+                  </li>
+                </ul>
+              </div>
+
+              <div class="sidebar-footer">
+                <button class="btn-text">Share</button>
+                <button class="btn-text" (click)="toggleWishlist()">
+                  {{ isInWishlist ? 'Wishlisted ❤️' : 'Wishlist' }}
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- Write Review Form -->
-      <div *ngIf="course.is_enrolled && !userHasReviewed" class="write-review mt-8 p-6 bg-gray-50 rounded-lg border">
-        <h3 class="text-xl font-semibold mb-4">Write a Review</h3>
-        <form (ngSubmit)="submitReview()">
-          <div class="mb-4">
-            <label class="block mb-2 font-medium">Rating</label>
-            <div class="flex gap-2">
-              <button 
-                type="button" 
-                *ngFor="let i of [1,2,3,4,5]" 
-                (click)="newReviewRating = i"
-                class="text-2xl focus:outline-none"
-                [class.text-yellow-500]="i <= newReviewRating"
-                [class.text-gray-300]="i > newReviewRating"
-              >
-                ★
-              </button>
-            </div>
-          </div>
-          <div class="mb-4">
-            <label class="block mb-2 font-medium">Comment</label>
-            <textarea 
-              [(ngModel)]="newReviewComment" 
-              name="comment"
-              rows="3" 
-              class="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-blue-500"
-              placeholder="Share your experience..."
-            ></textarea>
-          </div>
-          <button 
-            type="submit" 
-            [disabled]="submittingReview"
-            class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
-          >
-            {{ submittingReview ? 'Submitting...' : 'Submit Review' }}
-          </button>
-        </form>
-      </div>
-    </section>
+    </div>
   </div>
 </div>
 
 <ng-template #loadingTpl>
-  <div class="loading">Loading course details...</div>
+  <div class="loading-spinner">
+    <div class="spinner"></div>
+    <p>Loading course details...</p>
+  </div>
 </ng-template>

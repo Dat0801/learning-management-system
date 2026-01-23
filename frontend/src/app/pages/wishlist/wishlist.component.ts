@@ -1,12 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { WishlistService } from '../../services/wishlist.service';
 import { CourseCardComponent } from '../../shared/components/course-card/course-card.component';
 
 @Component({
   selector: 'app-wishlist',
   standalone: true,
-  imports: [CommonModule, CourseCardComponent],
+  imports: [CommonModule, RouterModule, CourseCardComponent],
   template: `
     <div class="page-container">
       <h1 class="page-title">My Wishlist</h1>
@@ -17,7 +18,7 @@ import { CourseCardComponent } from '../../shared/components/course-card/course-
 
       <div *ngIf="!loading && courses.length === 0" class="empty-state">
         <p>Your wishlist is empty.</p>
-        <a href="/browse" class="btn-primary">Browse Courses</a>
+        <a routerLink="/courses" class="btn-primary">Browse Courses</a>
       </div>
 
       <div *ngIf="!loading && courses.length > 0" class="course-grid">

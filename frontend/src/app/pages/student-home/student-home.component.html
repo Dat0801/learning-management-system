@@ -1,36 +1,137 @@
 <div class="student-home page-container">
-  <!-- Hero Section -->
-  <section class="hero-section">
-    <div class="hero-content">
-      <h1>Welcome back, {{ userName }}!</h1>
-      <p>Continue your learning journey or explore new courses to expand your skills.</p>
-      <a routerLink="/courses" class="btn-primary">Browse All Courses</a>
-    </div>
-  </section>
+  <div class="home-layout">
+    <!-- Main Content (Left Column) -->
+    <div class="main-content">
+      
+      <!-- Hero Section -->
+      <section class="hero-section">
+        <div class="hero-text">
+          <span class="welcome-msg">WELCOME BACK, {{ userName | uppercase }}!</span>
+          <h1>Ready to learn something new today?</h1>
+          <p>Master new skills with our expert-led courses and personalized learning paths designed for your career growth.</p>
+          <div class="hero-actions">
+            <a routerLink="/courses" class="btn-primary">Explore Courses</a>
+            <a routerLink="/my-learning" class="btn-secondary">Resume Learning</a>
+          </div>
+        </div>
+        <div class="hero-image">
+          <!-- Placeholder image or actual image if available -->
+           <div class="image-placeholder"></div>
+        </div>
+      </section>
 
-  <!-- Recommended Courses -->
-  <section class="section recommended-section" *ngIf="recommendedCourses.length > 0">
-    <div class="section-header">
-      <h2>Recommended for You</h2>
-      <a routerLink="/courses" class="see-all">See All</a>
-    </div>
-    <div class="course-grid">
-      <app-course-card *ngFor="let course of recommendedCourses" [course]="course"></app-course-card>
-    </div>
-  </section>
+      <!-- My Learning Progress -->
+      <section class="section progress-section" *ngIf="inProgressCourses.length > 0">
+        <div class="section-header">
+          <h2>My Learning Progress</h2>
+          <a routerLink="/my-learning" class="see-all">View All</a>
+        </div>
+        <div class="progress-grid">
+          <div class="progress-card" *ngFor="let course of inProgressCourses" [routerLink]="['/courses', course.id]" style="cursor: pointer;">
+            <div class="card-header">
+              <span class="category-tag">{{ course.category?.name || 'Course' }}</span>
+              <span class="status-badge">In Progress</span>
+            </div>
+            <h3>{{ course.title }}</h3>
+            <div class="progress-info">
+              <div class="progress-bar-container">
+                <div class="progress-bar" [style.width.%]="course.progress || 0"></div>
+              </div>
+              <span class="progress-text">{{ course.progress || 0 }}%</span>
+            </div>
+            <a [routerLink]="['/learning', course.id]" (click)="$event.stopPropagation()" class="btn-continue">Continue Lesson</a>
+          </div>
+        </div>
+      </section>
 
-  <!-- Popular Courses -->
-  <section class="section popular-section" *ngIf="popularCourses.length > 0">
-    <div class="section-header">
-      <h2>Popular Courses</h2>
-      <a routerLink="/courses" class="see-all">See All</a>
+      <!-- Recommended for You -->
+      <section class="section recommended-section" *ngIf="recommendedCourses.length > 0">
+        <div class="section-header">
+          <h2>Recommended for You</h2>
+          <div class="nav-arrows">
+            <button class="arrow-btn prev"><i class="fas fa-chevron-left"></i></button>
+            <button class="arrow-btn next"><i class="fas fa-chevron-right"></i></button>
+          </div>
+        </div>
+        <div class="course-grid">
+          <app-course-card *ngFor="let course of recommendedCourses" [course]="course"></app-course-card>
+        </div>
+      </section>
+
+      <!-- Free Courses -->
+      <section class="section free-section" *ngIf="freeCourses.length > 0">
+        <div class="section-header">
+          <h2>Free Courses</h2>
+          <a routerLink="/courses" [queryParams]="{price: 'free'}" class="see-all">View All</a>
+        </div>
+        <div class="course-grid">
+          <app-course-card *ngFor="let course of freeCourses" [course]="course"></app-course-card>
+        </div>
+      </section>
+
+      <div *ngIf="recommendedCourses.length === 0 && popularCourses.length === 0 && inProgressCourses.length === 0" class="loading-state">
+        <p>Loading your personalized dashboard...</p>
+      </div>
     </div>
-    <div class="course-grid">
-      <app-course-card *ngFor="let course of popularCourses" [course]="course"></app-course-card>
+
+    <!-- Sidebar (Right Column) -->
+    <div class="sidebar">
+      
+      <!-- Learning Paths -->
+      <div class="sidebar-widget learning-paths">
+        <h3>Learning Paths</h3>
+        <div class="path-list">
+          <div class="path-item" *ngFor="let path of learningPaths">
+            <div class="path-timeline">
+              <div class="dot" [ngClass]="{'active': path.status === 'In Progress'}"></div>
+              <div class="line" *ngIf="path !== learningPaths[learningPaths.length - 1]"></div>
+            </div>
+            <div class="path-content">
+              <span class="status-label">{{ path.status | uppercase }}</span>
+              <h4>{{ path.title }}</h4>
+              <p *ngIf="path.status === 'In Progress'">{{ path.coursesCompleted }} of {{ path.totalCourses }} courses completed</p>
+              <p *ngIf="path.status !== 'In Progress'">{{ path.totalCourses }} courses total</p>
+            </div>
+          </div>
+        </div>
+        <button class="btn-outline-full">Browse Paths</button>
+      </div>
+
+      <!-- Knowledge Hub -->
+      <div class="sidebar-widget knowledge-hub">
+        <h3>Knowledge Hub</h3>
+        <div class="article-list">
+          <div class="article-item" *ngFor="let article of knowledgeHub">
+            <div class="article-img"></div>
+            <div class="article-info">
+              <h4>{{ article.title }}</h4>
+              <span class="meta">{{ article.readTime }} • {{ article.date }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Weekly Goal -->
+      <div class="sidebar-widget weekly-goal">
+        <div class="goal-header">
+          <i class="fas fa-star"></i>
+          <h3>Weekly Goal</h3>
+        </div>
+        <p>You're on a 5-day streak! Keep going to earn 20 bonus points.</p>
+        <div class="chart-placeholder">
+          <div class="bars">
+            <div class="bar" style="height: 40%"></div>
+            <div class="bar" style="height: 60%"></div>
+            <div class="bar" style="height: 30%"></div>
+            <div class="bar" style="height: 80%"></div>
+            <div class="bar active" style="height: 50%"></div>
+            <div class="bar" style="height: 0%"></div>
+            <div class="bar" style="height: 0%"></div>
+          </div>
+          <span class="hours">12.5 hrs</span>
+        </div>
+      </div>
+
     </div>
-  </section>
-  
-  <div *ngIf="recommendedCourses.length === 0 && popularCourses.length === 0" class="loading-state">
-    <p>Loading your personalized dashboard...</p>
   </div>
 </div>

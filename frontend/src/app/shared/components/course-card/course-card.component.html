@@ -11,7 +11,7 @@
       (click)="toggleWishlist($event)"
       [title]="isInWishlist ? 'Remove from wishlist' : 'Add to wishlist'"
     >
-      <span class="heart-icon">{{ isInWishlist ? '♥' : '♡' }}</span>
+      <i class="fa-heart" [ngClass]="isInWishlist ? 'fas' : 'far'"></i>
     </button>
   </div>
   
@@ -19,6 +19,18 @@
     <h3 class="title" [title]="course.title">{{ course.title }}</h3>
     <p class="instructor">By {{ course.instructor?.name }}</p>
     
+    <div class="rating-row" *ngIf="!course.is_enrolled">
+      <span class="rating-number">{{ course.average_rating || '0.0' }}</span>
+      <div class="stars">
+        <i class="fas fa-star" [class.active]="(course.average_rating || 0) >= 1"></i>
+        <i class="fas fa-star" [class.active]="(course.average_rating || 0) >= 2"></i>
+        <i class="fas fa-star" [class.active]="(course.average_rating || 0) >= 3"></i>
+        <i class="fas fa-star" [class.active]="(course.average_rating || 0) >= 4"></i>
+        <i class="fas fa-star" [class.active]="(course.average_rating || 0) >= 5"></i>
+      </div>
+      <span class="review-count">({{ course.reviews_count || 0 }})</span>
+    </div>
+
     <div class="footer">
       <div *ngIf="course.is_enrolled; else notEnrolled" class="enrolled-status">
         <div class="progress-bar-container">
@@ -28,7 +40,15 @@
       </div>
       
       <ng-template #notEnrolled>
-        <span class="price">${{ course.price }}</span>
+        <div class="price-action-row">
+          <div class="price-container">
+            <span class="price" *ngIf="course.price > 0">${{ course.price }}</span>
+            <span class="price free" *ngIf="course.price == 0">Free</span>
+          </div>
+          <button class="cart-btn" (click)="$event.stopPropagation()">
+            <i class="fas fa-shopping-cart"></i>
+          </button>
+        </div>
       </ng-template>
     </div>
   </div>

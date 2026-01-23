@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\AdminLessonController;
 use App\Http\Controllers\Api\AdminQuizController;
 use App\Http\Controllers\Api\ReviewController;
+use App\Http\Controllers\Api\WishlistController;
 
 /*
 |--------------------------------------------------------------------------
