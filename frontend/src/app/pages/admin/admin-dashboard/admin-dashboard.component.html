@@ -1,87 +1,253 @@
-<div class="dashboard">
-  <h1>Dashboard</h1>
+<div class="dashboard-container" *ngIf="dashboardStats$ | async as stats">
+  <!-- Header -->
+  <header class="dashboard-header">
+    <div>
+      <h1>Dashboard Overview</h1>
+      <p>Welcome back, Alex. Here's what's happening on your platform today.</p>
+    </div>
+    <!-- Date/Actions could go here -->
+  </header>
 
-  <div class="stats-container" *ngIf="dashboardStats$ | async as stats">
+  <!-- Stats Cards -->
+  <div class="stats-grid">
+    <!-- Card 1: Total Students -->
     <div class="stat-card">
-      <div class="stat-header">
-        <h3>Total Users</h3>
-        <span class="icon">👥</span>
+      <div class="stat-top">
+        <div class="icon-wrapper blue">
+          <i class="fas fa-user-friends"></i>
+        </div>
+        <span class="trend positive">~ 12%</span>
       </div>
-      <p class="stat-value">{{ stats.total_users }}</p>
+      <div class="stat-content">
+        <span class="label">Total Students</span>
+        <span class="value">{{ stats.total_students | number }}</span>
+      </div>
     </div>
 
+    <!-- Card 2: Total Courses -->
     <div class="stat-card">
-      <div class="stat-header">
-        <h3>Students</h3>
-        <span class="icon">🎓</span>
+      <div class="stat-top">
+        <div class="icon-wrapper purple">
+          <i class="fas fa-book"></i>
+        </div>
+        <span class="trend positive">~ 5%</span>
       </div>
-      <p class="stat-value">{{ stats.total_students }}</p>
+      <div class="stat-content">
+        <span class="label">Total Courses</span>
+        <span class="value">{{ stats.total_courses | number }}</span>
+      </div>
     </div>
 
+    <!-- Card 3: Monthly Revenue -->
     <div class="stat-card">
-      <div class="stat-header">
-        <h3>Instructors</h3>
-        <span class="icon">👨‍🏫</span>
+      <div class="stat-top">
+        <div class="icon-wrapper green">
+          <i class="fas fa-dollar-sign"></i>
+        </div>
+        <span class="trend positive">~ 8%</span>
       </div>
-      <p class="stat-value">{{ stats.total_instructors }}</p>
+      <div class="stat-content">
+        <span class="label">Monthly Revenue</span>
+        <span class="value">${{ stats.revenue | number:'1.0-0' }}</span>
+      </div>
     </div>
 
+    <!-- Card 4: Active Enrollments -->
     <div class="stat-card">
-      <div class="stat-header">
-        <h3>Total Courses</h3>
-        <span class="icon">📚</span>
+      <div class="stat-top">
+        <div class="icon-wrapper orange">
+          <i class="fas fa-check-square"></i>
+        </div>
+        <span class="trend positive">~ 15%</span>
       </div>
-      <p class="stat-value">{{ stats.total_courses }}</p>
-    </div>
-
-    <div class="stat-card">
-      <div class="stat-header">
-        <h3>Total Enrollments</h3>
-        <span class="icon">✏️</span>
+      <div class="stat-content">
+        <span class="label">Active Enrollments</span>
+        <span class="value">{{ stats.total_enrollments | number }}</span>
       </div>
-      <p class="stat-value">{{ stats.total_enrollments }}</p>
-    </div>
-
-    <div class="stat-card">
-      <div class="stat-header">
-        <h3>Total Reviews</h3>
-        <span class="icon">⭐</span>
-      </div>
-      <p class="stat-value">{{ stats.total_reviews }}</p>
-    </div>
-
-    <div class="stat-card">
-      <div class="stat-header">
-        <h3>Avg Rating</h3>
-        <span class="icon">🌟</span>
-      </div>
-      <p class="stat-value">{{ stats.average_rating }}</p>
-    </div>
-
-    <div class="stat-card">
-      <div class="stat-header">
-        <h3>Revenue</h3>
-        <span class="icon">💰</span>
-      </div>
-      <p class="stat-value">${{ stats.revenue | number:'1.2-2' }}</p>
     </div>
   </div>
 
-  <div class="quick-links">
-    <h2>Quick Links</h2>
-    <div class="links-grid">
-      <a routerLink="/admin/users" class="link-card">
-        <h3>Manage Users</h3>
-        <p>View and manage all users</p>
-      </a>
-      <a routerLink="/admin/courses" class="link-card">
-        <h3>Manage Courses</h3>
-        <p>View and manage all courses</p>
-      </a>
-      <a routerLink="/admin/enrollments" class="link-card">
-        <h3>Manage Enrollments</h3>
-        <p>View and manage enrollments</p>
-      </a>
+  <!-- Charts Section -->
+  <div class="charts-grid">
+    <!-- Enrollment Trends -->
+    <div class="chart-card large">
+      <div class="card-header">
+        <div>
+          <h3>Enrollment Trends</h3>
+          <span class="subtitle">Student registration over the last 6 months</span>
+        </div>
+        <select class="period-select">
+          <option>Last 6 Months</option>
+        </select>
+      </div>
+      <div class="chart-area">
+        <!-- SVG Chart Placeholder -->
+        <svg viewBox="0 0 100 45" class="trend-chart" preserveAspectRatio="none">
+           <defs>
+             <linearGradient id="blueGradient" x1="0" y1="0" x2="0" y2="1">
+               <stop offset="0%" stop-color="#2563eb" stop-opacity="0.2"/>
+               <stop offset="100%" stop-color="#2563eb" stop-opacity="0"/>
+             </linearGradient>
+           </defs>
+           <!-- Area -->
+           <path d="M0,35 Q10,32 25,25 T50,20 T75,25 T100,10 V45 H0 Z" fill="url(#blueGradient)" />
+           <!-- Line -->
+           <path d="M0,35 Q10,32 25,25 T50,20 T75,25 T100,10" fill="none" stroke="#2563eb" stroke-width="0.8" stroke-linecap="round" />
+        </svg>
+        <div class="chart-labels">
+          <span>JAN</span><span>FEB</span><span>MAR</span><span>APR</span><span>MAY</span><span>JUN</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Platform Health -->
+    <div class="chart-card small">
+      <div class="card-header">
+        <h3>Platform Health</h3>
+      </div>
+      <div class="health-stats">
+        <div class="health-item">
+          <div class="label-row">
+            <span>Storage Usage</span>
+            <span class="percent">78%</span>
+          </div>
+          <div class="progress-bar">
+            <div class="fill blue" style="width: 78%"></div>
+          </div>
+        </div>
+        <div class="health-item">
+          <div class="label-row">
+            <span>Course Completion Rate</span>
+            <span class="percent">64%</span>
+          </div>
+          <div class="progress-bar">
+            <div class="fill green" style="width: 64%"></div>
+          </div>
+        </div>
+        <div class="health-item">
+          <div class="label-row">
+            <span>Server Load</span>
+            <span class="percent">24%</span>
+          </div>
+          <div class="progress-bar">
+            <div class="fill light-blue" style="width: 24%"></div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="pro-plan-card">
+        <div class="rocket-icon"><i class="fas fa-rocket"></i></div>
+        <div class="plan-info">
+          <h4>Pro Plan Active</h4>
+          <span>Renews in 12 days</span>
+        </div>
+      </div>
     </div>
   </div>
+
+  <!-- Recent Activities -->
+  <div class="recent-activities">
+    <div class="card-header">
+      <div>
+        <h3>Recent Activities</h3>
+        <p class="subtitle">Monitor latest updates and transactions</p>
+      </div>
+      <button class="view-all">View All Activity</button>
+    </div>
+    
+    <div class="table-responsive">
+      <table>
+        <thead>
+          <tr>
+            <th>ACTIVITY / USER</th>
+            <th>COURSE / CATEGORY</th>
+            <th>DATE & TIME</th>
+            <th>STATUS</th>
+            <th>ACTION</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <div class="user-cell">
+                <div class="icon-box orange"><i class="fas fa-file-alt"></i></div>
+                <div class="user-details">
+                  <span class="action-title">New Registration</span>
+                  <span class="user-sub">John Doe • john&#64;example.com</span>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="course-details">
+                <span class="course-name">N/A</span>
+                <span class="course-sub">Student Account</span>
+              </div>
+            </td>
+            <td>
+              <div class="time-details">
+                <span class="date">Oct 24, 2023</span>
+                <span class="time">10:42 AM</span>
+              </div>
+            </td>
+            <td><span class="badge success">Completed</span></td>
+            <td><button class="action-btn"><i class="fas fa-eye"></i></button></td>
+          </tr>
+          <tr>
+            <td>
+              <div class="user-cell">
+                <div class="icon-box red"><i class="fas fa-shopping-bag"></i></div>
+                <div class="user-details">
+                  <span class="action-title">Course Purchased</span>
+                  <span class="user-sub">Sarah Richardson • s.rich&#64;web.com</span>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="course-details">
+                <span class="course-name">Advanced React UI</span>
+                <span class="course-sub">Development</span>
+              </div>
+            </td>
+            <td>
+              <div class="time-details">
+                <span class="date">Oct 24, 2023</span>
+                <span class="time">09:15 AM</span>
+              </div>
+            </td>
+            <td><span class="badge success">Paid</span></td>
+            <td><button class="action-btn"><i class="fas fa-eye"></i></button></td>
+          </tr>
+          <tr>
+            <td>
+              <div class="user-cell">
+                <div class="icon-box orange-light"><i class="fas fa-user-headset"></i></div>
+                <div class="user-details">
+                  <span class="action-title">Support Ticket</span>
+                  <span class="user-sub">Mike Knight • mike.k&#64;domain.com</span>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="course-details">
+                <span class="course-name">LMS Access Issue</span>
+                <span class="course-sub">Technical Help</span>
+              </div>
+            </td>
+            <td>
+              <div class="time-details">
+                <span class="date">Oct 23, 2023</span>
+                <span class="time">04:30 PM</span>
+              </div>
+            </td>
+            <td><span class="badge warning">Pending</span></td>
+            <td><button class="action-btn"><i class="fas fa-eye"></i></button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="!(dashboardStats$ | async)" class="loading-state">
+  <p>Loading dashboard...</p>
 </div>

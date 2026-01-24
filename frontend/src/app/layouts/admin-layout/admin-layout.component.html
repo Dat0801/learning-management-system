@@ -1,68 +1,101 @@
 <div class="admin-layout">
-  <!-- Top Navigation -->
-  <nav class="navbar">
-    <div class="navbar-brand">
-      <button class="toggle-btn" (click)="toggleSidebar()">
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
-      <h1>Admin Dashboard</h1>
-    </div>
-    <div class="navbar-right">
-      <div class="user-info" *ngIf="currentUser$ | async as user">
-        <a routerLink="/profile" class="username" style="color: white; text-decoration: none; margin-right: 15px;">{{ user.name }}</a>
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="logo-icon">
+        <i class="fas fa-graduation-cap"></i>
       </div>
-      <button class="logout-btn" (click)="logout()">Logout</button>
+      <div class="logo-text">
+        <h2>LMS Admin</h2>
+        <span>Management Portal</span>
+      </div>
     </div>
-  </nav>
 
-  <!-- Main Content -->
-  <div class="admin-container">
-    <!-- Sidebar -->
-    <aside class="sidebar" [class.collapsed]="!sidebarOpen">
-      <ul class="menu">
-        <li>
-          <a routerLink="/home">
-            <i class="icon">🏠</i>
-            <span>Back to Home</span>
-          </a>
-        </li>
-        <li>
-          <a routerLink="/admin/dashboard" routerLinkActive="active">
-            <i class="icon">📊</i>
-            <span>Dashboard</span>
-          </a>
-        </li>
-        <li>
-          <a routerLink="/admin/users" routerLinkActive="active">
-            <i class="icon">👥</i>
-            <span>Users</span>
-          </a>
-        </li>
-        <li>
-          <a routerLink="/admin/courses" routerLinkActive="active">
-            <i class="icon">📚</i>
-            <span>Courses</span>
-          </a>
-        </li>
-        <li>
-          <a routerLink="/admin/categories" routerLinkActive="active">
-            <i class="icon">📂</i>
-            <span>Categories</span>
-          </a>
-        </li>
-        <li>
-          <a routerLink="/admin/enrollments" routerLinkActive="active">
-            <i class="icon">✏️</i>
-            <span>Enrollments</span>
-          </a>
-        </li>
-      </ul>
-    </aside>
+    <ul class="menu">
+      <li>
+        <a routerLink="/admin/dashboard" routerLinkActive="active">
+          <i class="fas fa-th-large"></i>
+          <span>Dashboard</span>
+        </a>
+      </li>
+      <li>
+        <a routerLink="/admin/courses" routerLinkActive="active">
+          <i class="fas fa-book"></i>
+          <span>Courses</span>
+        </a>
+      </li>
+      <li>
+        <a routerLink="/admin/users" routerLinkActive="active">
+          <i class="fas fa-users"></i>
+          <span>Users</span>
+        </a>
+      </li>
+      <li>
+        <a routerLink="/admin/categories" routerLinkActive="active">
+          <i class="fas fa-shapes"></i>
+          <span>Categories</span>
+        </a>
+      </li>
+      <li>
+        <a routerLink="/admin/enrollments" routerLinkActive="active">
+          <i class="fas fa-check-circle"></i>
+          <span>Enrollments</span>
+        </a>
+      </li>
+      <li>
+        <a routerLink="/admin/revenue" routerLinkActive="active"> <!-- Placeholder route -->
+          <i class="fas fa-money-bill-wave"></i>
+          <span>Revenue</span>
+        </a>
+      </li>
+      <li class="menu-divider"></li>
+      <li>
+        <a routerLink="/home">
+          <i class="fas fa-home"></i>
+          <span>Client Home</span>
+        </a>
+      </li>
+    </ul>
+
+    <div class="user-profile">
+      <div class="avatar">
+        <i class="fas fa-user-circle"></i>
+      </div>
+      <div class="info" *ngIf="currentUser$ | async as user">
+        <span class="name">{{ user.name }}</span>
+        <span class="role">Super Admin</span>
+      </div>
+      <div class="info" *ngIf="!(currentUser$ | async)">
+        <span class="name">Alex Henderson</span>
+        <span class="role">Super Admin</span>
+      </div>
+      <button class="menu-dots" (click)="logout()">
+        <i class="fas fa-sign-out-alt"></i>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content Wrapper -->
+  <div class="main-wrapper">
+    <!-- Top Navigation -->
+    <nav class="navbar">
+      <div class="search-bar">
+        <i class="fas fa-search"></i>
+        <input type="text" placeholder="Search courses, users, or reports...">
+      </div>
+      <div class="nav-actions">
+        <button class="icon-btn">
+          <i class="fas fa-bell"></i>
+          <span class="badge"></span>
+        </button>
+        <button class="icon-btn">
+          <i class="fas fa-cog"></i>
+        </button>
+      </div>
+    </nav>
 
     <!-- Main Content Area -->
-    <main class="main-content">
+    <main class="content">
       <router-outlet></router-outlet>
     </main>
   </div>

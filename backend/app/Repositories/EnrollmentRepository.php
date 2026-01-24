@@ -22,7 +22,7 @@ class EnrollmentRepository implements EnrollmentRepositoryInterface
     public function getUserEnrollments($userId)
     {
         return Enrollment::where('user_id', $userId)
-            ->with('course.instructor')
+            ->with(['course.instructor', 'course.category'])
             ->get();
     }
 }

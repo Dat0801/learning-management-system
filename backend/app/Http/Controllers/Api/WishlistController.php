@@ -10,7 +10,7 @@ class WishlistController extends Controller
 {
     public function index(Request $request)
     {
-        $wishlist = $request->user()->wishlist()->with('course.instructor')->get();
+        $wishlist = $request->user()->wishlist()->with(['course.instructor', 'course.category'])->get();
         // Return only the courses
         $courses = $wishlist->map(function ($item) {
             return $item->course;

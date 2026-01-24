@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { CourseService } from '../../services/course.service';
 import { ToastService } from '../../services/toast.service';
 import { Course, Lesson } from '../../models/course.model';
@@ -22,6 +23,14 @@ export class LearningComponent implements OnInit {
   progress = 0;
   sidebarOpen = true;
 
+  // Video State
+  safeVideoUrl: SafeResourceUrl | null = null;
+  isYoutube = false;
+
+  // UI State
+  activeTab: 'overview' | 'resources' | 'notes' | 'qa' = 'overview';
+
+
   // Quiz State
   quiz: any = null;
   quizLoading = false;
@@ -29,11 +38,28 @@ export class LearningComponent implements OnInit {
   quizResult: any = null;
   userAnswers: { [key: number]: number } = {};
 
+  // Resources State
+  resources: any[] = [];
+  resourcesLoading = false;
+
+  // Notes State
+  noteContent = '';
+  noteLoading = false;
+  noteSaving = false;
+
+  // Q&A State
+  questions: any[] = [];
+  questionsLoading = false;
+  newQuestion = { title: '', content: '' };
+  newAnswer: { [key: number]: string } = {};
+  submittingQuestion = false;
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private courseService: CourseService,
-    private toastService: ToastService
+    private toastService: ToastService,
+    private sanitizer: DomSanitizer
   ) {}
 
   ngOnInit(): void {
@@ -106,12 +132,47 @@ export class LearningComponent implements OnInit {
     this.quizResult = null;
     this.userAnswers = {};
 
+    // Reset Tab Data
+    this.resources = [];
+    this.noteContent = '';
+    this.questions = [];
+
+    if (this.activeTab === 'resources') this.loadResources();
+    if (this.activeTab === 'notes') this.loadNote();
+    if (this.activeTab === 'qa') this.loadQuestions();
+
     if (lesson.has_quiz) {
       this.loadQuiz(lesson.id);
     }
 
+    // Process Video URL
+    if (lesson.video_url) {
+      this.processVideoUrl(lesson.video_url);
+    } else {
+      this.safeVideoUrl = null;
+      this.isYoutube = false;
+    }
+
     this.updateUrl();
     window.scrollTo(0, 0);
+  }
+
+  processVideoUrl(url: string) {
+    // Regex to match YouTube video ID from various URL formats (including mobile, short links, etc.)
+    const youtubeRegex = /(?:https?:\/\/)?(?:www\.|m\.)?(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})(?:\S+)?/;
+    const match = url.match(youtubeRegex);
+
+    if (match && match[1]) {
+      this.isYoutube = true;
+      const videoId = match[1];
+      // Add origin for security and rel=0 to limit related videos
+      const origin = window.location.origin;
+      const embedUrl = `https://www.youtube.com/embed/${videoId}?origin=${origin}&rel=0`;
+      this.safeVideoUrl = this.sanitizer.bypassSecurityTrustResourceUrl(embedUrl);
+    } else {
+      this.isYoutube = false;
+      this.safeVideoUrl = null; // Let <video> tag handle it or use trusted resource url if needed
+    }
   }
 
   loadQuiz(lessonId: number) {
@@ -201,6 +262,99 @@ export class LearningComponent implements OnInit {
     }
     const completed = this.course.lessons.filter(l => l.is_completed).length;
     this.progress = Math.round((completed / this.course.lessons.length) * 100);
+  }
+
+  setActiveTab(tab: 'overview' | 'resources' | 'notes' | 'qa') {
+    this.activeTab = tab;
+    if (this.currentLesson) {
+      if (tab === 'resources') this.loadResources();
+      if (tab === 'notes') this.loadNote();
+      if (tab === 'qa') this.loadQuestions();
+    }
+  }
+
+  loadResources() {
+    if (!this.currentLesson) return;
+    this.resourcesLoading = true;
+    this.courseService.getLessonResources(this.currentLesson.id).subscribe({
+      next: (res: any) => {
+        this.resources = res;
+        this.resourcesLoading = false;
+      },
+      error: () => this.resourcesLoading = false
+    });
+  }
+
+  loadNote() {
+    if (!this.currentLesson) return;
+    this.noteLoading = true;
+    this.courseService.getLessonNote(this.currentLesson.id).subscribe({
+      next: (res: any) => {
+        this.noteContent = res?.content || '';
+        this.noteLoading = false;
+      },
+      error: () => this.noteLoading = false
+    });
+  }
+
+  saveNote() {
+    if (!this.currentLesson) return;
+    this.noteSaving = true;
+    this.courseService.saveLessonNote(this.currentLesson.id, this.noteContent).subscribe({
+      next: () => {
+        this.toastService.success('Note saved');
+        this.noteSaving = false;
+      },
+      error: () => {
+        this.toastService.error('Failed to save note');
+        this.noteSaving = false;
+      }
+    });
+  }
+
+  loadQuestions() {
+    if (!this.currentLesson) return;
+    this.questionsLoading = true;
+    this.courseService.getLessonQuestions(this.currentLesson.id).subscribe({
+      next: (res: any) => {
+        this.questions = res;
+        this.questionsLoading = false;
+      },
+      error: () => this.questionsLoading = false
+    });
+  }
+
+  askQuestion() {
+    if (!this.currentLesson || !this.newQuestion.title || !this.newQuestion.content) return;
+    this.submittingQuestion = true;
+    this.courseService.askQuestion(this.currentLesson.id, this.newQuestion).subscribe({
+      next: (question) => {
+        this.questions.unshift(question);
+        this.newQuestion = { title: '', content: '' };
+        this.submittingQuestion = false;
+        this.toastService.success('Question posted');
+      },
+      error: () => {
+        this.toastService.error('Failed to post question');
+        this.submittingQuestion = false;
+      }
+    });
+  }
+
+  submitAnswer(questionId: number) {
+    if (!this.newAnswer[questionId]) return;
+    this.courseService.answerQuestion(questionId, this.newAnswer[questionId]).subscribe({
+      next: (answer) => {
+        const question = this.questions.find(q => q.id === questionId);
+        if (question) {
+          if (!question.answers) question.answers = [];
+          question.answers.push(answer);
+        }
+        this.newAnswer[questionId] = '';
+        this.toastService.success('Answer posted');
+      },
+      error: () => this.toastService.error('Failed to post answer')
+    });
   }
 
   toggleSidebar() {

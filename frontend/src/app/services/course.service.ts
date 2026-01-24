@@ -78,4 +78,31 @@ export class CourseService {
   submitQuiz(quizId: number, answers: any): Observable<any> {
     return this.http.post<any>(`${environment.apiUrl}/quizzes/${quizId}/submit`, { answers });
   }
+
+  // Lesson Resources
+  getLessonResources(lessonId: number): Observable<any[]> {
+    return this.http.get<any[]>(`${environment.apiUrl}/lessons/${lessonId}/resources`);
+  }
+
+  // Lesson Notes
+  getLessonNote(lessonId: number): Observable<any> {
+    return this.http.get<any>(`${environment.apiUrl}/lessons/${lessonId}/note`);
+  }
+
+  saveLessonNote(lessonId: number, content: string): Observable<any> {
+    return this.http.post<any>(`${environment.apiUrl}/lessons/${lessonId}/note`, { content });
+  }
+
+  // Lesson Q&A
+  getLessonQuestions(lessonId: number): Observable<any[]> {
+    return this.http.get<any[]>(`${environment.apiUrl}/lessons/${lessonId}/questions`);
+  }
+
+  askQuestion(lessonId: number, data: { title: string, content: string }): Observable<any> {
+    return this.http.post<any>(`${environment.apiUrl}/lessons/${lessonId}/questions`, data);
+  }
+
+  answerQuestion(questionId: number, content: string): Observable<any> {
+    return this.http.post<any>(`${environment.apiUrl}/questions/${questionId}/answers`, { content });
+  }
 }

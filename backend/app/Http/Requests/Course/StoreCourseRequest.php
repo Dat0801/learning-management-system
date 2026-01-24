@@ -18,6 +18,14 @@ class StoreCourseRequest extends FormRequest
             'description' => ['nullable', 'string'],
             'price' => ['nullable', 'numeric', 'min:0'],
             'status' => ['nullable', 'in:draft,published,archived'],
+            'category_id' => ['nullable', 'exists:categories,id'],
+            'lessons' => ['nullable', 'array'],
+            'lessons.*.title' => ['required', 'string'],
+            'lessons.*.content' => ['nullable', 'string'],
+            'lessons.*.video_url' => ['nullable', 'string'],
+            'lessons.*.duration' => ['nullable', 'string'],
+            'lessons.*.is_preview' => ['boolean'],
+            'lessons.*.order' => ['integer'],
         ];
     }
 }

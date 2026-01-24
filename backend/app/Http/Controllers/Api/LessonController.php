@@ -26,6 +26,7 @@ class LessonController extends Controller
                     ->exists();
              }
              
+             $lesson->load('resources');
              return response()->json($lesson);
         }
 
@@ -44,6 +45,7 @@ class LessonController extends Controller
             ->exists();
 
         $lesson->has_quiz = $lesson->quiz()->exists();
+        $lesson->load('resources');
 
         return response()->json($lesson);
     }

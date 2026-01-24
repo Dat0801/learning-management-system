@@ -122,6 +122,19 @@ export class AdminService {
     return this.http.delete(`${this.apiUrl}/courses/${courseId}/lessons/${lessonId}`);
   }
 
+  // Lesson Resources
+  getLessonResources(lessonId: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/lessons/${lessonId}/resources`);
+  }
+
+  createLessonResource(lessonId: number, data: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/lessons/${lessonId}/resources`, data);
+  }
+
+  deleteLessonResource(resourceId: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/resources/${resourceId}`);
+  }
+
   // Quiz Management
   getQuiz(lessonId: number): Observable<any> {
     return this.http.get(`${this.apiUrl}/lessons/${lessonId}/quiz`);
