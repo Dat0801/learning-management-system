@@ -27,9 +27,9 @@ export class StudentHomeComponent implements OnInit {
   ];
 
   knowledgeHub = [
-    { title: 'How to Build a Consistent Study Habit', readTime: '5 min read', date: 'June 12', image: 'assets/images/placeholder-1.jpg' }, // using placeholder for now
-    { title: 'Top 10 High-Income Skills to Learn in 2024', readTime: '8 min read', date: 'June 10', image: 'assets/images/placeholder-2.jpg' },
-    { title: 'Understanding AI: Why Everyone Should Code', readTime: '12 min read', date: 'June 05', image: 'assets/images/placeholder-3.jpg' }
+    { title: 'How to Build a Consistent Study Habit', readTime: '5 min read', date: 'June 12', image: 'assets/images/course-placeholder.svg' }, // using placeholder for now
+    { title: 'Top 10 High-Income Skills to Learn in 2024', readTime: '8 min read', date: 'June 10', image: 'assets/images/course-placeholder.svg' },
+    { title: 'Understanding AI: Why Everyone Should Code', readTime: '12 min read', date: 'June 05', image: 'assets/images/course-placeholder.svg' }
   ];
 
   constructor(

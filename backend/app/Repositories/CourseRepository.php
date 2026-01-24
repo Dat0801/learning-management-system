@@ -9,7 +9,7 @@ class CourseRepository implements CourseRepositoryInterface
 {
     public function all(array $filters = [])
     {
-        $query = Course::with('instructor')
+        $query = Course::with(['instructor', 'category'])
             ->withExists(['enrollments as is_enrolled' => function ($query) {
                 $query->where('user_id', auth()->id());
             }]);
@@ -52,7 +52,7 @@ class CourseRepository implements CourseRepositoryInterface
 
     public function find($id)
     {
-        $course = Course::with(['instructor', 'lessons' => function($query) {
+        $course = Course::with(['instructor', 'category', 'lessons' => function($query) {
             $query->orderBy('order');
         }])->findOrFail($id);
 

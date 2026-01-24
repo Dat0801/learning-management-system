@@ -9,8 +9,17 @@
     <app-quiz-management [lessonId]="selectedLessonForQuiz.id"></app-quiz-management>
   </div>
 
+  <!-- Resource Management View -->
+  <div *ngIf="selectedLessonForResources">
+    <div class="header">
+      <h3>Resources for: {{ selectedLessonForResources.title }}</h3>
+      <button class="btn-secondary" (click)="closeResources()">Back to Curriculum</button>
+    </div>
+    <app-resource-management [lessonId]="selectedLessonForResources.id"></app-resource-management>
+  </div>
+
   <!-- Lesson List View -->
-  <div *ngIf="!selectedLessonForQuiz">
+  <div *ngIf="!selectedLessonForQuiz && !selectedLessonForResources">
     <div class="header">
       <h3>Curriculum</h3>
       <button class="btn-add" (click)="startAddLesson()" *ngIf="!isEditing">+ Add Lesson</button>
@@ -29,6 +38,7 @@
           <span class="badge preview" *ngIf="lesson.is_preview">Preview</span>
         </div>
         <div class="actions">
+          <button (click)="manageResources(lesson)" class="btn-sm btn-secondary">Resources</button>
           <button (click)="manageQuiz(lesson)" class="btn-sm btn-info">Quiz</button>
           <button (click)="startEditLesson(lesson)" class="btn-sm">Edit</button>
           <button (click)="deleteLesson(lesson)" class="btn-sm btn-danger">Delete</button>

@@ -65,33 +65,7 @@ class DatabaseSeeder extends Seeder
             'role' => 'student',
         ]);
 
-        // 3. Create Courses (Only if instructor has none)
-        // We only seed courses if the instructor doesn't have any, to avoid duplicating 
-        // courses every time the seeder is run.
-        if ($instructor->courses()->count() === 0) {
-            $cats = Category::all();
-
-            Course::factory(5)->create([
-                'instructor_id' => $instructor->id,
-            ])->each(function ($course) use ($cats) {
-                // Assign a random category
-                if ($cats->count() > 0) {
-                    $course->update(['category_id' => $cats->random()->id]);
-                }
-
-                // Create 5 lessons for each course
-                // Ensure at least one is a preview
-                Lesson::factory()->create([
-                    'course_id' => $course->id,
-                    'is_preview' => true,
-                    'order' => 1,
-                    'title' => 'Introduction (Preview)',
-                ]);
-
-                Lesson::factory(4)->create([
-                    'course_id' => $course->id,
-                ]);
-            });
-        }
+        // 3. Create Courses
+        $this->call(CourseSeeder::class);
     }
 }

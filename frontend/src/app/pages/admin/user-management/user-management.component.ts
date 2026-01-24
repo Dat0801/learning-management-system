@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { AdminService } from '../../../core/services/admin.service';
 import { ToastService } from '../../../services/toast.service';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-user-management',
@@ -16,12 +17,26 @@ export class UserManagementComponent implements OnInit {
   users$: Observable<any> | null = null;
   searchTerm = '';
   selectedRole = '';
+  selectedStatus = '';
   editingUser: any = null;
   showEditForm = false;
   showEnrollModal = false;
   enrollingUser: any = null;
   courses$: Observable<any> | null = null;
   selectedCourseId: number | null = null;
+
+  // Pagination
+  currentPage = 1;
+  itemsPerPage = 10;
+  totalItems = 0;
+
+  // Mock Stats
+  stats = [
+    { label: 'Total Users', value: '12,840', change: '+12%', trend: 'up', icon: 'fas fa-users', bg: 'bg-blue' },
+    { label: 'Active Students', value: '10,200', change: '+8%', trend: 'up', icon: 'fas fa-graduation-cap', bg: 'bg-green' },
+    { label: 'Instructors', value: '2,440', change: '+3%', trend: 'up', icon: 'fas fa-chalkboard-teacher', bg: 'bg-purple' },
+    { label: 'Pending Approvals', value: '156', change: '-5%', trend: 'down', icon: 'fas fa-hourglass-half', bg: 'bg-orange' }
+  ];
 
   roles = ['student', 'instructor', 'admin'];
 
@@ -35,11 +50,49 @@ export class UserManagementComponent implements OnInit {
   }
 
   loadUsers(): void {
-    this.users$ = this.adminService.getAllUsers(this.searchTerm, this.selectedRole);
+    this.users$ = this.adminService.getAllUsers(this.searchTerm, this.selectedRole).pipe(
+      map(response => {
+        // Mock data augmentation for UI demonstration
+        if (response.data) {
+          let users = response.data.map((user: any) => ({
+            ...user,
+            // Mock status if not present
+            status: user.status || (Math.random() > 0.2 ? 'Active' : (Math.random() > 0.5 ? 'Suspended' : 'Pending')),
+            // Mock ID if needed (though usually present)
+            displayId: user.id ? `#${88000 + user.id}` : '#88219',
+            // Mock joined date if not present
+            joinedDate: user.created_at ? new Date(user.created_at) : new Date(2023, 9, 12)
+          }));
+
+          // Frontend filtering for mock status
+          if (this.selectedStatus) {
+            users = users.filter((u: any) => u.status === this.selectedStatus);
+          }
+
+          response.data = users;
+          // Update total items based on filtered result if we are filtering on frontend, 
+          // or keep original total if we assume backend pagination (but here we filter visible data)
+          this.totalItems = this.selectedStatus ? users.length : (response.total || users.length);
+        }
+        return response;
+      })
+    );
   }
 
   onSearch(): void {
+    this.currentPage = 1;
     this.loadUsers();
+  }
+
+  onPageChange(page: number): void {
+    this.currentPage = page;
+    // In a real app, pass page to service
+    this.loadUsers(); 
+  }
+
+  getPages(total: number, perPage: number): number[] {
+    const pages = Math.ceil(total / perPage);
+    return Array(pages).fill(0).map((x, i) => i + 1);
   }
 
   openCreateUserModal(): void {

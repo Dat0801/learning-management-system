@@ -33,4 +33,19 @@ class Lesson extends Model
     {
         return $this->hasOne(Quiz::class);
     }
+
+    public function resources()
+    {
+        return $this->hasMany(LessonResource::class);
+    }
+
+    public function notes()
+    {
+        return $this->hasMany(LessonNote::class);
+    }
+
+    public function questions()
+    {
+        return $this->hasMany(LessonQuestion::class);
+    }
 }

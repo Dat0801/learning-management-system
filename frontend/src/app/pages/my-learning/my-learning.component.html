@@ -44,7 +44,7 @@
   <div class="course-list" *ngIf="!isLoading && filteredCourses.length > 0">
     <div class="course-card-horizontal" *ngFor="let course of filteredCourses">
       <div class="card-thumbnail" [routerLink]="['/courses', course.id]">
-        <img [src]="course.thumbnail || 'assets/images/course-placeholder.jpg'" [alt]="course.title">
+        <img [src]="course.thumbnail || 'assets/images/course-placeholder.svg'" [alt]="course.title">
         <div class="overlay"></div>
       </div>
       

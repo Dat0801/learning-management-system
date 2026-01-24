@@ -9,6 +9,7 @@ import { Course, Lesson } from '../../models/course.model';
 import { map, switchMap } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { FormsModule } from '@angular/forms';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-course-detail',
@@ -22,6 +23,10 @@ export class CourseDetailComponent implements OnInit {
   loading = true;
   currentLesson: Lesson | null = null;
   isInWishlist = false;
+  
+  // Preview Modal
+  showPreviewModal = false;
+  previewVideoUrl: SafeResourceUrl | null = null;
   
   // Reviews
   reviews: any[] = [];
@@ -57,7 +62,8 @@ export class CourseDetailComponent implements OnInit {
     private courseService: CourseService,
     public authService: AuthService,
     private wishlistService: WishlistService,
-    private toastService: ToastService
+    private toastService: ToastService,
+    private sanitizer: DomSanitizer
   ) {}
 
   ngOnInit(): void {
@@ -240,6 +246,49 @@ export class CourseDetailComponent implements OnInit {
     // But typical LMS allows jumping to any lesson if enrolled (or at least previous ones).
     
     return 'locked'; 
+  }
+
+  openPreview(lesson?: Lesson) {
+    let videoUrl = '';
+    
+    if (lesson) {
+      if (!lesson.is_preview) return;
+      videoUrl = lesson.video_url || '';
+    } else {
+      // Find first previewable lesson
+      const previewLesson = this.course?.lessons?.find(l => l.is_preview && l.video_url);
+      if (previewLesson) {
+        videoUrl = previewLesson.video_url || '';
+      }
+    }
+
+    if (videoUrl) {
+      // Handle YouTube Embed
+      if (videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be')) {
+         const videoId = this.extractVideoId(videoUrl);
+         if (videoId) {
+           const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&origin=${window.location.origin}`;
+           this.previewVideoUrl = this.sanitizer.bypassSecurityTrustResourceUrl(embedUrl);
+           this.showPreviewModal = true;
+         }
+      } else {
+        this.previewVideoUrl = this.sanitizer.bypassSecurityTrustResourceUrl(videoUrl);
+        this.showPreviewModal = true;
+      }
+    } else {
+      this.toastService.info('No preview video available for this course.');
+    }
+  }
+
+  closePreview() {
+    this.showPreviewModal = false;
+    this.previewVideoUrl = null;
+  }
+
+  private extractVideoId(url: string): string | null {
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? match[2] : null;
   }
 
   enroll() {

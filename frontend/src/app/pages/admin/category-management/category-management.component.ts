@@ -14,6 +14,7 @@ import { ToastService } from '../../../services/toast.service';
 export class CategoryManagementComponent implements OnInit {
   categories: any[] = [];
   filteredCategories: any[] = [];
+  displayedCategories: any[] = [];
   searchTerm: string = '';
   isLoading = false;
   showModal = false;
@@ -23,6 +24,19 @@ export class CategoryManagementComponent implements OnInit {
     description: '',
     parent_id: null
   };
+
+  // Pagination
+  currentPage = 1;
+  itemsPerPage = 10;
+  totalItems = 0;
+
+  // Stats
+  stats = [
+    { label: 'Total Categories', value: '0', change: '+0%', trend: 'up', icon: 'fas fa-layer-group', bg: 'bg-blue' },
+    { label: 'Total Courses', value: '0', change: '+0%', trend: 'up', icon: 'fas fa-graduation-cap', bg: 'bg-green' },
+    { label: 'Top Category', value: '-', change: 'Most Popular', trend: 'up', icon: 'fas fa-star', bg: 'bg-purple' },
+    { label: 'Active', value: '0', change: '100%', trend: 'up', icon: 'fas fa-check-circle', bg: 'bg-orange' }
+  ];
 
   constructor(
     private adminService: AdminService,
@@ -38,31 +52,76 @@ export class CategoryManagementComponent implements OnInit {
     this.adminService.getAllCategories().subscribe({
       next: (data) => {
         this.categories = data;
+        this.calculateStats();
         this.filterCategories();
         this.isLoading = false;
       },
-      error: (err) => {
-        console.error('Error loading categories', err);
+      error: (error) => {
+        console.error('Error loading categories:', error);
+        this.toastService.error('Failed to load categories');
         this.isLoading = false;
       }
     });
   }
 
-  onSearch() {
-    this.filterCategories();
+  calculateStats() {
+    const totalCategories = this.categories.length;
+    const totalCourses = this.categories.reduce((acc, cat) => acc + (cat.courses_count || 0), 0);
+    
+    // Find top category
+    let maxCourses = -1;
+    let topCategory = '-';
+    this.categories.forEach(cat => {
+      if ((cat.courses_count || 0) > maxCourses) {
+        maxCourses = cat.courses_count || 0;
+        topCategory = cat.name;
+      }
+    });
+
+    this.stats = [
+      { label: 'Total Categories', value: totalCategories.toString(), change: '+12%', trend: 'up', icon: 'fas fa-layer-group', bg: 'bg-blue' },
+      { label: 'Total Courses', value: totalCourses.toString(), change: '+8%', trend: 'up', icon: 'fas fa-graduation-cap', bg: 'bg-green' },
+      { label: 'Top Category', value: topCategory, change: `${maxCourses} Courses`, trend: 'up', icon: 'fas fa-star', bg: 'bg-purple' },
+      { label: 'Active', value: totalCategories.toString(), change: '100%', trend: 'neutral', icon: 'fas fa-check-circle', bg: 'bg-orange' }
+    ];
   }
 
   filterCategories() {
-    if (!this.searchTerm) {
-      this.filteredCategories = this.categories;
-      return;
+    let filtered = this.categories;
+
+    if (this.searchTerm) {
+      const term = this.searchTerm.toLowerCase();
+      filtered = filtered.filter(cat => 
+        cat.name.toLowerCase().includes(term) || 
+        cat.slug.toLowerCase().includes(term) ||
+        (cat.description && cat.description.toLowerCase().includes(term))
+      );
     }
-    const term = this.searchTerm.toLowerCase();
-    this.filteredCategories = this.categories.filter(cat => 
-      cat.name.toLowerCase().includes(term) || 
-      cat.slug.toLowerCase().includes(term) ||
-      (cat.description && cat.description.toLowerCase().includes(term))
-    );
+
+    this.totalItems = filtered.length;
+    this.filteredCategories = filtered;
+    this.updateDisplayedCategories();
+  }
+
+  updateDisplayedCategories() {
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    const endIndex = startIndex + this.itemsPerPage;
+    this.displayedCategories = this.filteredCategories.slice(startIndex, endIndex);
+  }
+
+  onSearch() {
+    this.currentPage = 1;
+    this.filterCategories();
+  }
+
+  onPageChange(page: number) {
+    this.currentPage = page;
+    this.updateDisplayedCategories();
+  }
+
+  getPages(total: number, perPage: number): number[] {
+    const pages = Math.ceil(total / perPage);
+    return Array(pages).fill(0).map((x, i) => i + 1);
   }
 
   openCreateModal() {
@@ -95,18 +154,25 @@ export class CategoryManagementComponent implements OnInit {
   }
 
   saveCategory() {
+    if (!this.editingCategory.name || !this.editingCategory.slug) {
+      this.toastService.warning('Name and Slug are required');
+      return;
+    }
+
     const request$ = this.editingCategory.id
       ? this.adminService.updateCategory(this.editingCategory.id, this.editingCategory)
       : this.adminService.createCategory(this.editingCategory);
 
     request$.subscribe({
       next: () => {
-        this.loadCategories();
+        this.toastService.success(
+          this.editingCategory.id ? 'Category updated successfully' : 'Category created successfully'
+        );
         this.closeModal();
-        this.toastService.success('Category saved successfully');
+        this.loadCategories();
       },
-      error: (err) => {
-        console.error('Error saving category', err);
+      error: (error) => {
+        console.error('Error saving category:', error);
         this.toastService.error('Failed to save category');
       }
     });
@@ -116,12 +182,12 @@ export class CategoryManagementComponent implements OnInit {
     if (confirm('Are you sure you want to delete this category?')) {
       this.adminService.deleteCategory(id).subscribe({
         next: () => {
-          this.loadCategories();
           this.toastService.success('Category deleted successfully');
+          this.loadCategories();
         },
-        error: (err) => {
-          console.error('Error deleting category', err);
-          this.toastService.error('Failed to delete category (Ensure it has no courses)');
+        error: (error) => {
+          console.error('Error deleting category:', error);
+          this.toastService.error('Failed to delete category');
         }
       });
     }

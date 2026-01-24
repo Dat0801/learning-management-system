@@ -13,6 +13,9 @@ use App\Http\Controllers\Api\AdminLessonController;
 use App\Http\Controllers\Api\AdminQuizController;
 use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\WishlistController;
+use App\Http\Controllers\Api\AdminLessonResourceController;
+use App\Http\Controllers\Api\LessonNoteController;
+use App\Http\Controllers\Api\LessonQuestionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -32,6 +35,7 @@ Route::middleware('optional.auth')->group(function () {
     Route::get('courses/popular', [CourseController::class, 'popular']);
     Route::get('courses', [CourseController::class, 'index']);
     Route::get('courses/{course}', [CourseController::class, 'show']);
+    Route::get('courses/{course}/reviews', [ReviewController::class, 'index']);
     Route::get('/lessons/{lesson}', [LessonController::class, 'show']);
 });
 
@@ -63,6 +67,15 @@ Route::middleware('auth:sanctum')->group(function () {
     // Lessons
     Route::post('/lessons/{lesson}/complete', [LessonController::class, 'complete']);
     Route::delete('/lessons/{lesson}/complete', [LessonController::class, 'incomplete']);
+
+    // Lesson Notes
+    Route::get('/lessons/{lesson}/note', [LessonNoteController::class, 'show']);
+    Route::post('/lessons/{lesson}/note', [LessonNoteController::class, 'store']);
+
+    // Lesson Q&A
+    Route::get('/lessons/{lesson}/questions', [LessonQuestionController::class, 'index']);
+    Route::post('/lessons/{lesson}/questions', [LessonQuestionController::class, 'store']);
+    Route::post('/questions/{question}/answers', [LessonQuestionController::class, 'answer']);
 
     // Quizzes
     Route::get('/lessons/{lesson}/quiz', [QuizController::class, 'showByLesson']);
@@ -107,6 +120,11 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
     Route::post('/courses/{course}/lessons', [AdminLessonController::class, 'store']);
     Route::put('/courses/{course}/lessons/{lesson}', [AdminLessonController::class, 'update']);
     Route::delete('/courses/{course}/lessons/{lesson}', [AdminLessonController::class, 'destroy']);
+
+    // Lesson Resources Management
+    Route::get('/lessons/{lesson}/resources', [AdminLessonResourceController::class, 'index']);
+    Route::post('/lessons/{lesson}/resources', [AdminLessonResourceController::class, 'store']);
+    Route::delete('/resources/{resource}', [AdminLessonResourceController::class, 'destroy']);
 
     // Quiz Management
     Route::get('/lessons/{lesson}/quiz', [AdminQuizController::class, 'getQuiz']);

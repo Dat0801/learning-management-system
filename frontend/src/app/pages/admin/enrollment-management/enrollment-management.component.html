@@ -1,35 +1,178 @@
-<div class="enrollment-management">
-  <h1>Enrollment Management</h1>
+<div class="enrollment-management-page">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <div class="breadcrumbs">Admin <span class="separator">›</span> Enrollments</div>
+      <h1>Enrollment Records</h1>
+      <p class="subtitle">Manage student enrollments and monitor platform revenue in real-time.</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn-outline">
+        <i class="fas fa-file-export"></i> Export CSV
+      </button>
+      <button class="btn-primary">
+        <i class="fas fa-plus"></i> New Enrollment
+      </button>
+    </div>
+  </div>
 
-  <!-- Enrollments Table -->
-  <div class="table-container" *ngIf="enrollments$ | async as response">
-    <table class="enrollments-table">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Student</th>
-          <th>Course</th>
-          <th>Enrolled Date</th>
-          <th>Status</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let enrollment of response.data">
-          <td>{{ enrollment.id }}</td>
-          <td>{{ enrollment.user?.name || 'N/A' }}</td>
-          <td>{{ enrollment.course?.title || 'N/A' }}</td>
-          <td>{{ enrollment.created_at | date: 'medium' }}</td>
-          <td>
-            <span class="status-badge" [ngClass]="'status-' + (enrollment.status || 'active')">
-              {{ enrollment.status || 'active' }}
-            </span>
-          </td>
-          <td class="actions">
-            <button class="btn-delete" (click)="deleteEnrollment(enrollment.id)">Delete</button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+  <!-- Stats Cards -->
+  <div class="stats-grid">
+    <div class="stat-card" *ngFor="let stat of stats">
+      <div class="stat-content">
+        <div class="stat-header">
+          <span class="stat-label">{{ stat.label }}</span>
+          <div class="stat-icon" [ngClass]="stat.bg">
+            <i [class]="stat.icon"></i>
+          </div>
+        </div>
+        <div class="stat-body">
+          <span class="stat-value">{{ stat.value }}</span>
+          <div class="stat-trend" [ngClass]="stat.trend === 'up' ? 'up' : (stat.trend === 'down' ? 'down' : 'neutral')">
+            <i *ngIf="stat.trend !== 'neutral'" class="fas" [ngClass]="stat.trend === 'up' ? 'fa-arrow-up' : 'fa-arrow-down'"></i>
+            <span class="trend-value">{{ stat.change }}</span>
+            <span class="trend-text" *ngIf="stat.trend !== 'neutral'">vs last month</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Content Section -->
+  <div class="content-section">
+    <!-- Filters -->
+    <div class="filters-bar">
+      <div class="filter-group search">
+        <label>SEARCH STUDENTS</label>
+        <div class="search-wrapper">
+          <i class="fas fa-search"></i>
+          <input type="text" [(ngModel)]="searchTerm" (input)="loadEnrollments()" placeholder="Name, Email or Course...">
+        </div>
+      </div>
+      
+      <div class="filter-group">
+        <label>PAYMENT STATUS</label>
+        <select [(ngModel)]="selectedStatus" (change)="loadEnrollments()">
+          <option value="">All Statuses</option>
+          <option value="active">Paid</option>
+          <option value="pending">Pending</option>
+          <option value="refunded">Refunded</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label>DATE RANGE</label>
+        <select [(ngModel)]="selectedDateRange">
+          <option value="7">Last 7 Days</option>
+          <option value="30">Last 30 Days</option>
+          <option value="90">Last 3 Months</option>
+        </select>
+      </div>
+
+      <div class="filter-actions">
+        <button class="btn-reset" (click)="searchTerm = ''; selectedStatus = ''; loadEnrollments()">
+          Reset
+        </button>
+      </div>
+    </div>
+
+    <!-- Enrollments Table -->
+    <div class="table-container" *ngIf="enrollments$ | async as response">
+      <table class="enrollments-table">
+        <thead>
+          <tr>
+            <th>STUDENT NAME</th>
+            <th>COURSE ENROLLED</th>
+            <th>DATE</th>
+            <th>STATUS</th>
+            <th>PAYMENT METHOD</th>
+            <th>AMOUNT PAID</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let enrollment of response.data">
+            <!-- Student Name -->
+            <td>
+              <div class="student-info">
+                <div class="avatar" [ngClass]="getAvatarColor(enrollment.user?.name || '')">
+                  {{ getInitials(enrollment.user?.name || 'N/A') }}
+                </div>
+                <div class="info">
+                  <span class="name">{{ enrollment.user?.name || 'N/A' }}</span>
+                  <span class="email">{{ enrollment.student_email }}</span>
+                </div>
+              </div>
+            </td>
+            
+            <!-- Course Enrolled -->
+            <td>
+              <div class="course-info">
+                <span class="title">{{ enrollment.course?.title || 'N/A' }}</span>
+                <span class="category-badge">{{ enrollment.course_category }}</span>
+              </div>
+            </td>
+
+            <!-- Date -->
+            <td class="date-cell">{{ enrollment.created_at | date: 'mediumDate' }}</td>
+
+            <!-- Status -->
+            <td>
+              <span class="status-badge" [ngClass]="{
+                'paid': enrollment.payment_status === 'Paid',
+                'pending': enrollment.payment_status === 'Pending',
+                'refunded': enrollment.payment_status === 'Refunded'
+              }">
+                {{ enrollment.payment_status }}
+              </span>
+            </td>
+
+            <!-- Payment Method -->
+            <td>
+              <div class="payment-method">
+                <i [class]="enrollment.payment_method.icon"></i>
+                <span>{{ enrollment.payment_method.name }}</span>
+              </div>
+            </td>
+
+            <!-- Amount Paid -->
+            <td class="amount-cell">
+              <strong>${{ enrollment.amount | number:'1.2-2' }}</strong>
+            </td>
+
+            <!-- Actions -->
+            <td class="actions-cell">
+              <button class="btn-icon">
+                <i class="fas fa-ellipsis-v"></i>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Pagination -->
+      <div class="pagination-bar">
+        <div class="showing-text">
+          Showing <strong>{{ (currentPage - 1) * itemsPerPage + 1 }}</strong> to <strong>{{ currentPage * itemsPerPage > totalItems ? totalItems : currentPage * itemsPerPage }}</strong> of <strong>{{ totalItems }}</strong> results
+        </div>
+        <div class="pagination-controls">
+          <button class="page-btn prev" [disabled]="currentPage === 1" (click)="onPageChange(currentPage - 1)">
+            <i class="fas fa-chevron-left"></i>
+          </button>
+          
+          <button 
+            *ngFor="let p of getPages(totalItems, itemsPerPage)" 
+            class="page-btn" 
+            [class.active]="p === currentPage"
+            (click)="onPageChange(p)">
+            {{ p }}
+          </button>
+          
+          <button class="page-btn next" [disabled]="currentPage * itemsPerPage >= totalItems" (click)="onPageChange(currentPage + 1)">
+            <i class="fas fa-chevron-right"></i>
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </div>

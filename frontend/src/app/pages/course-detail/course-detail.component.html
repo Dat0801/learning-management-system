@@ -93,9 +93,13 @@
                     <span class="preview-text" *ngIf="lesson.is_preview && !course.is_enrolled">Preview</span>
                     <span class="duration">05:20</span>
                   </div>
-                  <a *ngIf="course.is_enrolled || lesson.is_preview" 
+                  <a *ngIf="course.is_enrolled" 
                      [routerLink]="['/learning', course.id]" 
                      [queryParams]="{lesson: lesson.id}"
+                     class="lesson-link-overlay"></a>
+                  <a *ngIf="!course.is_enrolled && lesson.is_preview"
+                     (click)="$event.preventDefault(); openPreview(lesson)"
+                     href="#"
                      class="lesson-link-overlay"></a>
                 </div>
               </div>
@@ -200,7 +204,7 @@
         <div class="sidebar-content">
           <!-- Video Preview -->
           <div class="preview-card">
-            <div class="video-thumbnail">
+            <div class="video-thumbnail" (click)="openPreview()">
               <div class="play-overlay">
                 <div class="play-icon"><i class="fas fa-play"></i></div>
                 <span>Preview this course</span>
@@ -260,3 +264,13 @@
     <p>Loading course details...</p>
   </div>
 </ng-template>
+
+<!-- Preview Modal -->
+<div class="video-modal-overlay" *ngIf="showPreviewModal" (click)="closePreview()">
+  <div class="video-modal-content" (click)="$event.stopPropagation()">
+    <button class="close-btn" (click)="closePreview()"><i class="fas fa-times"></i></button>
+    <div class="video-wrapper">
+      <iframe *ngIf="previewVideoUrl" [src]="previewVideoUrl" frameborder="0" allowfullscreen allow="autoplay"></iframe>
+    </div>
+  </div>
+</div>

@@ -35,7 +35,15 @@ class CourseService
 
     public function createCourse(array $data)
     {
-        return $this->courseRepository->create($data);
+        $course = $this->courseRepository->create($data);
+
+        if (isset($data['lessons']) && is_array($data['lessons'])) {
+            foreach ($data['lessons'] as $lessonData) {
+                $course->lessons()->create($lessonData);
+            }
+        }
+
+        return $course;
     }
 
     public function updateCourse($id, array $data, $user = null)

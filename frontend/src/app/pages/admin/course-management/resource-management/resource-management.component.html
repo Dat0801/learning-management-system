@@ -1,0 +1,37 @@
+<div class="resource-management">
+  <h3>Resources</h3>
+  
+  <div class="add-resource-form">
+    <div class="form-group">
+      <input type="text" [(ngModel)]="newResource.title" placeholder="Title" class="form-control">
+    </div>
+    <div class="form-group">
+      <input type="text" [(ngModel)]="newResource.url" placeholder="URL / File Link" class="form-control">
+    </div>
+    <div class="form-group">
+      <select [(ngModel)]="newResource.type" class="form-control">
+        <option value="file">File</option>
+        <option value="link">Link</option>
+        <option value="code">Code</option>
+      </select>
+    </div>
+    <button (click)="addResource()" class="btn btn-primary btn-sm">Add</button>
+  </div>
+
+  <div class="resource-list" *ngIf="!isLoading">
+    <div *ngFor="let resource of resources" class="resource-item">
+      <div class="resource-info">
+        <span class="type-badge">{{ resource.type }}</span>
+        <a [href]="resource.url" target="_blank">{{ resource.title }}</a>
+      </div>
+      <button (click)="deleteResource(resource.id)" class="btn-icon delete">
+        <i class="fas fa-trash"></i>
+      </button>
+    </div>
+    <div *ngIf="resources.length === 0" class="no-resources">
+      No resources added yet.
+    </div>
+  </div>
+  
+  <div *ngIf="isLoading" class="loading">Loading...</div>
+</div>

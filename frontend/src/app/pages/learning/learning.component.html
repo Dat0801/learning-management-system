@@ -1,136 +1,280 @@
-<div class="learning-container" *ngIf="course && currentLesson; else loadingTpl">
+<div class="learning-layout" *ngIf="course && currentLesson; else loadingTpl">
   
-  <!-- Main Content Area -->
-  <div class="main-content" [class.full-width]="!sidebarOpen">
-    <div class="top-bar">
-      <a [routerLink]="['/courses', course.id]" class="back-link">← Back to Course</a>
-      <button class="toggle-sidebar-btn" (click)="toggleSidebar()">
-        {{ sidebarOpen ? 'Hide Sidebar' : 'Show Sidebar' }}
-      </button>
+  <!-- Global Header -->
+  <header class="learning-header">
+    <div class="header-left">
+      <a routerLink="/home" class="logo-area">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </a>
+      <h1 class="course-title">{{ course.title }}</h1>
     </div>
 
-    <!-- Quiz Mode -->
-    <div class="quiz-container" *ngIf="quiz && !quizSubmitted">
-        <div class="quiz-header">
+    <div class="header-center">
+      <div class="progress-wrapper">
+        <div class="progress-label">
+          <span class="label-text">COURSE PROGRESS</span>
+          <span class="percentage">{{ progress }}%</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" [style.width.%]="progress"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="header-right">
+      <a [routerLink]="['/courses', course.id]" class="btn-dashboard">Back to Dashboard</a>
+      <div class="user-avatar">
+        <img src="https://ui-avatars.com/api/?name=User&background=random" alt="User">
+      </div>
+    </div>
+  </header>
+
+  <div class="learning-body">
+    <!-- Sidebar (Left) -->
+    <aside class="learning-sidebar">
+      <div class="sidebar-header">
+        <h2>Course Outline</h2>
+        <p class="module-info">Module 1: Course Content</p>
+      </div>
+      
+      <div class="lesson-list">
+        <div 
+          *ngFor="let lesson of course.lessons; let i = index" 
+          class="lesson-item"
+          [class.active]="lesson.id === currentLesson.id"
+          [class.completed]="lesson.is_completed"
+          [class.locked]="!isLessonAccessible(lesson)"
+          (click)="selectLesson(lesson)"
+        >
+          <div class="status-icon">
+            <div *ngIf="lesson.is_completed" class="icon-check">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </div>
+            <div *ngIf="!lesson.is_completed && lesson.id === currentLesson.id" class="icon-play">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+              </svg>
+            </div>
+            <div *ngIf="!lesson.is_completed && lesson.id !== currentLesson.id && isLessonAccessible(lesson)" class="icon-circle"></div>
+            <div *ngIf="!isLessonAccessible(lesson)" class="icon-lock">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+              </svg>
+            </div>
+          </div>
+          
+          <div class="lesson-info">
+            <span class="lesson-title">{{ i + 1 }}. {{ lesson.title }}</span>
+            <span class="lesson-meta">
+              <span *ngIf="lesson.duration">{{ lesson.duration }}</span>
+              <span *ngIf="lesson.has_quiz" class="badge-quiz">Quiz</span>
+            </span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content (Right) -->
+    <main class="learning-main">
+      <div class="video-section">
+        <!-- Quiz Mode -->
+        <div class="quiz-container" *ngIf="quiz && !quizSubmitted">
+          <div class="quiz-header">
             <h2>{{ quiz.title }}</h2>
             <p>{{ quiz.description }}</p>
             <span class="badge">Passing Score: {{ quiz.passing_score }}%</span>
-        </div>
-        
-        <div class="quiz-questions">
+          </div>
+          
+          <div class="quiz-questions">
             <div *ngFor="let question of quiz.questions; let i = index" class="question-item">
-                <p class="q-text"><strong>Q{{ i + 1 }}.</strong> {{ question.question_text }}</p>
-                <div class="answers">
-                    <div *ngFor="let answer of question.answers" class="answer-option">
-                        <label>
-                            <input type="radio" [name]="'q' + question.id" [value]="answer.id" [(ngModel)]="userAnswers[question.id]">
-                            {{ answer.answer_text }}
-                        </label>
-                    </div>
+              <p class="q-text"><strong>Q{{ i + 1 }}.</strong> {{ question.question_text }}</p>
+              <div class="answers">
+                <div *ngFor="let answer of question.answers" class="answer-option">
+                  <label>
+                    <input type="radio" [name]="'q' + question.id" [value]="answer.id" [(ngModel)]="userAnswers[question.id]">
+                    {{ answer.answer_text }}
+                  </label>
                 </div>
+              </div>
             </div>
-        </div>
-        
-        <div class="quiz-actions">
+          </div>
+          
+          <div class="quiz-actions">
             <button class="btn-primary" (click)="submitQuiz()" [disabled]="quizLoading">Submit Quiz</button>
+          </div>
         </div>
-    </div>
 
-    <!-- Quiz Result Mode -->
-    <div class="quiz-result" *ngIf="quizSubmitted">
-        <h2>Quiz Result</h2>
-        <div class="score-card" [class.passed]="quizResult.passed" [class.failed]="!quizResult.passed">
+        <!-- Quiz Result Mode -->
+        <div class="quiz-result" *ngIf="quizSubmitted">
+          <h2>Quiz Result</h2>
+          <div class="score-card" [class.passed]="quizResult.passed" [class.failed]="!quizResult.passed">
             <h3>Score: {{ quizResult.score }}%</h3>
             <p>{{ quizResult.passed ? 'Congratulations! You passed.' : 'You did not pass. Try again.' }}</p>
-        </div>
-        <div class="result-actions">
+          </div>
+          <div class="result-actions">
             <button class="btn-secondary" (click)="selectLesson(currentLesson!)">Retry Quiz</button> 
             <button class="btn-primary" *ngIf="quizResult.passed" (click)="nextLesson()">Next Lesson</button>
+          </div>
         </div>
-    </div>
 
-    <!-- Video Mode (Default) -->
-    <div class="video-player" *ngIf="!quiz && !quizSubmitted">
-      <video 
-        *ngIf="currentLesson.video_url" 
-        controls 
-        [src]="currentLesson.video_url" 
-        class="real-video-player"
-        controlsList="nodownload"
-      >
-        Your browser does not support the video tag.
-      </video>
-      <!-- Placeholder for Video Player (Fallback) -->
-      <div *ngIf="!currentLesson.video_url" class="player-placeholder">
-        <div class="play-icon">▶</div>
-        <p>Video for: {{ currentLesson.title }}</p>
-        <p *ngIf="currentLesson.content" class="lesson-content-preview">{{ currentLesson.content }}</p>
-      </div>
-    </div>
+        <!-- Video Player -->
+        <div class="video-player-wrapper" *ngIf="!quiz && !quizSubmitted">
+          <div class="video-aspect-ratio">
+            <iframe 
+              *ngIf="isYoutube && safeVideoUrl" 
+              [src]="safeVideoUrl" 
+              class="video-iframe" 
+              frameborder="0" 
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+              allowfullscreen>
+            </iframe>
 
-    <div class="lesson-details" *ngIf="!quiz">
-      <div class="lesson-header">
-        <h1>{{ currentLesson.title }}</h1>
-        <div class="actions">
-            <button class="btn-nav" (click)="prevLesson()" [disabled]="currentLesson.id === course.lessons![0].id">Previous</button>
-            <button 
-                class="btn-complete" 
-                [class.completed]="currentLesson.is_completed"
-                (click)="toggleCompletion()"
-            >
-                {{ currentLesson.is_completed ? 'Mark Incomplete' : 'Mark Complete' }}
-            </button>
-            <button class="btn-nav" (click)="nextLesson()" [disabled]="currentLesson.id === course.lessons![course.lessons!.length - 1].id">Next</button>
+            <video 
+              *ngIf="!isYoutube && currentLesson.video_url" 
+              controls 
+              [src]="currentLesson.video_url" 
+              class="video-native"
+              controlsList="nodownload">
+              Your browser does not support the video tag.
+            </video>
+
+            <div *ngIf="!currentLesson.video_url" class="video-placeholder">
+              <div class="placeholder-content">
+                <div class="play-circle">
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                  </svg>
+                </div>
+                <p>No video available for this lesson</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-      <div class="lesson-description">
-        <h3>Description</h3>
-        <p>{{ currentLesson.content || 'No description available for this lesson.' }}</p>
+
+      <!-- Tabs Navigation -->
+      <div class="content-tabs-wrapper">
+        <div class="tabs-header">
+          <button class="tab-btn" [class.active]="activeTab === 'overview'" (click)="setActiveTab('overview')">Overview</button>
+          <button class="tab-btn" [class.active]="activeTab === 'resources'" (click)="setActiveTab('resources')">Resources</button>
+          <button class="tab-btn" [class.active]="activeTab === 'notes'" (click)="setActiveTab('notes')">Notes</button>
+          <button class="tab-btn" [class.active]="activeTab === 'qa'" (click)="setActiveTab('qa')">Q&A <span class="badge-count" *ngIf="questions.length">{{ questions.length }}</span></button>
+        </div>
+
+        <div class="tab-content">
+          <!-- Overview Tab -->
+          <div *ngIf="activeTab === 'overview'" class="tab-pane fade-in">
+            <div class="lesson-header">
+              <h2>{{ currentLesson.title }}</h2>
+              <div class="lesson-actions">
+                 <button 
+                    class="btn-complete" 
+                    [class.completed]="currentLesson.is_completed"
+                    (click)="toggleCompletion()"
+                >
+                    {{ currentLesson.is_completed ? 'Mark Incomplete' : 'Mark Complete' }}
+                </button>
+              </div>
+            </div>
+            
+            <div class="lesson-description">
+              <p *ngIf="currentLesson.content" [innerHTML]="currentLesson.content"></p>
+              <p *ngIf="!currentLesson.content" class="text-muted">No description provided for this lesson.</p>
+            </div>
+          </div>
+
+          <!-- Resources Tab -->
+          <div *ngIf="activeTab === 'resources'" class="tab-pane fade-in">
+             <div *ngIf="resourcesLoading" class="loading-state">Loading resources...</div>
+             <div *ngIf="!resourcesLoading && resources.length === 0" class="empty-state">
+                <p>No resources available for this lesson.</p>
+             </div>
+             <div *ngIf="!resourcesLoading && resources.length > 0" class="resources-list">
+                <a *ngFor="let resource of resources" [href]="resource.url" target="_blank" class="resource-card">
+                   <div class="icon">
+                     <i class="fas fa-file-alt" *ngIf="resource.type === 'file'"></i>
+                     <i class="fas fa-link" *ngIf="resource.type === 'link'"></i>
+                     <i class="fas fa-code" *ngIf="resource.type === 'code'"></i>
+                   </div>
+                   <div class="info">
+                     <h4>{{ resource.title }}</h4>
+                     <span class="type">{{ resource.type | titlecase }}</span>
+                   </div>
+                   <div class="action">
+                     <i class="fas fa-external-link-alt"></i>
+                   </div>
+                </a>
+             </div>
+          </div>
+
+          <!-- Notes Tab -->
+          <div *ngIf="activeTab === 'notes'" class="tab-pane fade-in">
+             <div class="notes-container">
+                <div class="notes-header">
+                   <h3>My Notes</h3>
+                   <span class="status" *ngIf="noteSaving">Saving...</span>
+                </div>
+                <textarea [(ngModel)]="noteContent" placeholder="Type your notes here... These are private to you." class="notes-area"></textarea>
+                <div class="notes-actions">
+                   <button (click)="saveNote()" class="btn-primary" [disabled]="noteSaving">Save Note</button>
+                </div>
+             </div>
+          </div>
+
+          <!-- Q&A Tab -->
+          <div *ngIf="activeTab === 'qa'" class="tab-pane fade-in">
+             <div class="qa-container">
+                <div class="ask-question-box">
+                   <h3>Ask a Question</h3>
+                   <input type="text" [(ngModel)]="newQuestion.title" placeholder="Question Title" class="form-control mb-2">
+                   <textarea [(ngModel)]="newQuestion.content" placeholder="Describe your question..." class="form-control mb-2" rows="2"></textarea>
+                   <button (click)="askQuestion()" class="btn-primary" [disabled]="submittingQuestion">Post Question</button>
+                </div>
+
+                <div class="questions-list">
+                   <div *ngIf="questionsLoading">Loading questions...</div>
+                   <div *ngFor="let q of questions" class="question-card">
+                      <div class="q-header">
+                         <div class="user-info">
+                            <span class="name">{{ q.user.first_name }} {{ q.user.last_name }}</span>
+                            <span class="date">{{ q.created_at | date }}</span>
+                         </div>
+                      </div>
+                      <h4 class="q-title">{{ q.title }}</h4>
+                      <p class="q-content">{{ q.content }}</p>
+                      
+                      <div class="answers-section">
+                         <h5>Answers ({{ q.answers?.length || 0 }})</h5>
+                         <div *ngFor="let ans of q.answers" class="answer-item">
+                            <div class="ans-meta">
+                               <span class="name">{{ ans.user.first_name }} {{ ans.user.last_name }}</span>
+                               <span class="role badge" *ngIf="ans.user.role === 'admin' || ans.user.role === 'instructor'">Instructor</span>
+                            </div>
+                            <p>{{ ans.content }}</p>
+                         </div>
+                         
+                         <div class="reply-box">
+                            <input type="text" [(ngModel)]="newAnswer[q.id]" placeholder="Write a reply..." class="form-control">
+                            <button (click)="submitAnswer(q.id)" class="btn-sm btn-secondary">Reply</button>
+                         </div>
+                      </div>
+                   </div>
+                </div>
+             </div>
+          </div>
+        </div>
       </div>
-    </div>
+    </main>
   </div>
-
-  <!-- Sidebar -->
-  <div class="sidebar" *ngIf="sidebarOpen">
-    <div class="sidebar-header">
-      <h3>Course Content</h3>
-      <div class="progress-container">
-        <div class="progress-info">
-            <span>{{ progress }}% Complete</span>
-        </div>
-        <div class="progress-bar">
-          <div class="fill" [style.width.%]="progress"></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="lesson-list">
-      <div 
-        class="lesson-item" 
-        *ngFor="let lesson of course.lessons; let i = index"
-        [class.active]="lesson.id === currentLesson.id"
-        [class.completed]="lesson.is_completed"
-        [class.locked]="!isLessonAccessible(lesson)"
-        (click)="selectLesson(lesson)"
-      >
-        <div class="status-indicator">
-          <span *ngIf="lesson.is_completed" class="check">✓</span>
-          <span *ngIf="!lesson.is_completed && !isLessonAccessible(lesson)" class="lock">🔒</span>
-          <span *ngIf="!lesson.is_completed && isLessonAccessible(lesson) && lesson.id !== currentLesson.id" class="play-icon">○</span>
-          <span *ngIf="lesson.id === currentLesson.id && !lesson.is_completed" class="play">▶</span>
-        </div>
-        <div class="lesson-info">
-          <span class="lesson-number">Lesson {{ i + 1 }}</span>
-          <span class="lesson-title">
-             {{ lesson.title }} 
-             <span *ngIf="lesson.is_preview && !course.is_enrolled" class="text-xs text-blue-500">(Preview)</span>
-          </span>
-          <span class="quiz-badge" *ngIf="lesson.has_quiz">Quiz</span>
-        </div>
-      </div>
-    </div>
-  </div>
-
 </div>
 
 <ng-template #loadingTpl>

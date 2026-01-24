@@ -103,7 +103,7 @@ class AdminController extends Controller
     // Course Management
     public function getAllCoursesAdmin(Request $request)
     {
-        $query = Course::with('instructor');
+        $query = Course::with(['instructor', 'category']);
 
         if ($request->has('status')) {
             $query->where('status', $request->status);
@@ -121,7 +121,7 @@ class AdminController extends Controller
 
     public function getCourseDetail($courseId)
     {
-        $course = Course::with(['instructor', 'lessons', 'enrollments'])->findOrFail($courseId);
+        $course = Course::with(['instructor', 'category', 'lessons', 'enrollments'])->findOrFail($courseId);
         return response()->json($course);
     }
 
