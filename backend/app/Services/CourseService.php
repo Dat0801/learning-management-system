@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Models\Course;
+use App\Notifications\CourseUpdated;
 use App\Repositories\Interfaces\CourseRepositoryInterface;
 
 class CourseService
@@ -58,7 +60,26 @@ class CourseService
             $data['published_at'] = now();
         }
 
-        return $this->courseRepository->update($id, $data);
+        $updatedCourse = $this->courseRepository->update($id, $data);
+
+        // Notify enrolled students about course updates
+        $enrolledUsers = $updatedCourse->enrollments()->with('user')->get()->pluck('user');
+        $updates = [];
+        if (isset($data['title'])) {
+            $updates[] = 'Course title updated';
+        }
+        if (isset($data['description'])) {
+            $updates[] = 'Course description updated';
+        }
+        if (isset($data['lessons'])) {
+            $updates[] = 'New lessons added';
+        }
+
+        foreach ($enrolledUsers as $enrolledUser) {
+            $enrolledUser->notify(new CourseUpdated($updatedCourse, $updates));
+        }
+
+        return $updatedCourse;
     }
 
     public function deleteCourse($id)

@@ -45,4 +45,14 @@ class User extends Authenticatable
     {
         return $this->hasMany(Wishlist::class);
     }
+
+    public function certificates()
+    {
+        return $this->hasMany(Certificate::class);
+    }
+
+    public function transactions()
+    {
+        return $this->hasMany(Transaction::class);
+    }
 }

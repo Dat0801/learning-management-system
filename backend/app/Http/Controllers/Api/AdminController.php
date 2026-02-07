@@ -3,10 +3,11 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use App\Models\Course;
 use App\Models\Enrollment;
 use App\Models\Review;
+use App\Models\Transaction;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
@@ -15,6 +16,9 @@ class AdminController extends Controller
     // Dashboard Statistics
     public function getDashboardStats()
     {
+        $totalRevenue = Transaction::where('status', 'completed')->sum('amount');
+        $pendingRevenue = Transaction::where('status', 'pending')->sum('amount');
+
         return response()->json([
             'total_users' => User::count(),
             'total_students' => User::where('role', 'student')->count(),
@@ -23,7 +27,10 @@ class AdminController extends Controller
             'total_enrollments' => Enrollment::count(),
             'total_reviews' => Review::count(),
             'average_rating' => round(Review::avg('rating') ?? 0, 1),
-            'revenue' => Course::sum('price'),
+            'revenue' => $totalRevenue,
+            'pending_revenue' => $pendingRevenue,
+            'total_transactions' => Transaction::count(),
+            'completed_transactions' => Transaction::where('status', 'completed')->count(),
         ]);
     }
 
@@ -39,16 +46,18 @@ class AdminController extends Controller
         if ($request->has('search')) {
             $search = $request->search;
             $query->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
+                ->orWhere('email', 'like', "%{$search}%");
         }
 
         $users = $query->paginate($request->get('per_page', 15));
+
         return response()->json($users);
     }
 
     public function getUserDetail($userId)
     {
         $user = User::with(['courses', 'enrollments'])->findOrFail($userId);
+
         return response()->json($user);
     }
 
@@ -77,7 +86,7 @@ class AdminController extends Controller
 
         $request->validate([
             'name' => 'string|max:255',
-            'email' => 'email|unique:users,email,' . $userId,
+            'email' => 'email|unique:users,email,'.$userId,
             'role' => 'in:student,instructor,admin',
             'password' => 'nullable|string|min:8',
         ]);
@@ -90,6 +99,7 @@ class AdminController extends Controller
         }
 
         $user->update($data);
+
         return response()->json($user);
     }
 
@@ -97,6 +107,7 @@ class AdminController extends Controller
     {
         $user = User::findOrFail($userId);
         $user->delete();
+
         return response()->json(['message' => 'User deleted successfully'], 204);
     }
 
@@ -112,16 +123,18 @@ class AdminController extends Controller
         if ($request->has('search')) {
             $search = $request->search;
             $query->where('title', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%");
+                ->orWhere('description', 'like', "%{$search}%");
         }
 
         $courses = $query->paginate($request->get('per_page', 15));
+
         return response()->json($courses);
     }
 
     public function getCourseDetail($courseId)
     {
         $course = Course::with(['instructor', 'category', 'lessons', 'enrollments'])->findOrFail($courseId);
+
         return response()->json($course);
     }
 
@@ -137,7 +150,7 @@ class AdminController extends Controller
 
         // Verify that the assigned user is actually an instructor or admin
         $instructor = User::findOrFail($request->instructor_id);
-        if (!in_array($instructor->role, ['instructor', 'admin'])) {
+        if (! in_array($instructor->role, ['instructor', 'admin'])) {
             return response()->json(['message' => 'Selected user must be an instructor or admin'], 422);
         }
 
@@ -165,6 +178,7 @@ class AdminController extends Controller
         ]);
 
         $course->update($request->all());
+
         return response()->json($course);
     }
 
@@ -172,6 +186,7 @@ class AdminController extends Controller
     {
         $course = Course::findOrFail($courseId);
         $course->delete();
+
         return response()->json(['message' => 'Course deleted successfully'], 204);
     }
 
@@ -185,6 +200,7 @@ class AdminController extends Controller
         }
 
         $enrollments = $query->paginate($request->get('per_page', 15));
+
         return response()->json($enrollments);
     }
 
@@ -217,6 +233,46 @@ class AdminController extends Controller
     {
         $enrollment = Enrollment::findOrFail($enrollmentId);
         $enrollment->delete();
+
         return response()->json(['message' => 'Enrollment deleted successfully'], 204);
+    }
+
+    // Transaction Management
+    public function getAllTransactions(Request $request)
+    {
+        $query = Transaction::with(['user', 'course']);
+
+        if ($request->has('status')) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->has('payment_method')) {
+            $query->where('payment_method', $request->payment_method);
+        }
+
+        if ($request->has('search')) {
+            $search = $request->search;
+            $query->where('transaction_id', 'like', "%{$search}%")
+                ->orWhereHas('user', function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%");
+                })
+                ->orWhereHas('course', function ($q) use ($search) {
+                    $q->where('title', 'like', "%{$search}%");
+                });
+        }
+
+        $transactions = $query->orderBy('created_at', 'desc')
+            ->paginate($request->get('per_page', 15));
+
+        return response()->json($transactions);
+    }
+
+    public function getTransactionDetail($transactionId)
+    {
+        $transaction = Transaction::with(['user', 'course'])
+            ->findOrFail($transactionId);
+
+        return response()->json($transaction);
     }
 }

@@ -1,21 +1,23 @@
 <?php
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\AdminController;
+use App\Http\Controllers\Api\AdminLessonController;
+use App\Http\Controllers\Api\AdminLessonResourceController;
+use App\Http\Controllers\Api\AdminQuizController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\CertificateController;
 use App\Http\Controllers\Api\CourseController;
 use App\Http\Controllers\Api\EnrollmentController;
-use App\Http\Controllers\Api\AdminController;
-use App\Http\Controllers\Api\QuizController;
 use App\Http\Controllers\Api\LessonController;
-use App\Http\Controllers\Api\CategoryController;
-use App\Http\Controllers\Api\AdminLessonController;
-use App\Http\Controllers\Api\AdminQuizController;
-use App\Http\Controllers\Api\ReviewController;
-use App\Http\Controllers\Api\WishlistController;
-use App\Http\Controllers\Api\AdminLessonResourceController;
 use App\Http\Controllers\Api\LessonNoteController;
 use App\Http\Controllers\Api\LessonQuestionController;
+use App\Http\Controllers\Api\PaymentController;
+use App\Http\Controllers\Api\QuizController;
+use App\Http\Controllers\Api\ReviewController;
+use App\Http\Controllers\Api\WishlistController;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -45,7 +47,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', function (Request $request) {
         return $request->user();
     });
-    
+
     // Profile Management
     Route::put('/profile', [AuthController::class, 'updateProfile']);
     Route::put('/profile/password', [AuthController::class, 'changePassword']);
@@ -59,7 +61,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('courses', [CourseController::class, 'store']);
     Route::put('courses/{course}', [CourseController::class, 'update']);
     Route::delete('courses/{course}', [CourseController::class, 'destroy']);
-    
+
+    // Payments
+    Route::post('/courses/{course}/payment-intent', [PaymentController::class, 'createPaymentIntent']);
+    Route::post('/payments/confirm', [PaymentController::class, 'confirmPayment']);
+    Route::get('/my-transactions', [PaymentController::class, 'myTransactions']);
+
     // Enrollments
     Route::post('/courses/{course}/enroll', [EnrollmentController::class, 'store']);
     Route::get('/my-courses', [EnrollmentController::class, 'myEnrollments']);
@@ -84,7 +91,15 @@ Route::middleware('auth:sanctum')->group(function () {
     // Reviews
     Route::post('/courses/{course}/reviews', [ReviewController::class, 'store']);
     Route::delete('/reviews/{review}', [ReviewController::class, 'destroy']);
+
+    // Certificates
+    Route::get('/courses/{course}/certificate', [CertificateController::class, 'checkCertificate']);
+    Route::get('/my-certificates', [CertificateController::class, 'myCertificates']);
+    Route::get('/certificates/{certificateNumber}/download', [CertificateController::class, 'downloadCertificate']);
 });
+
+// Public certificate verification
+Route::get('/certificates/{certificateNumber}/verify', [CertificateController::class, 'verifyCertificate']);
 
 // Admin Routes
 Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function () {
@@ -138,4 +153,8 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
     Route::post('/questions/{question}/answers', [AdminQuizController::class, 'storeAnswer']);
     Route::put('/answers/{answer}', [AdminQuizController::class, 'updateAnswer']);
     Route::delete('/answers/{answer}', [AdminQuizController::class, 'deleteAnswer']);
+
+    // Transaction Management
+    Route::get('/transactions', [AdminController::class, 'getAllTransactions']);
+    Route::get('/transactions/{transaction}', [AdminController::class, 'getTransactionDetail']);
 });
