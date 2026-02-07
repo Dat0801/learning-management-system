@@ -18,8 +18,17 @@ class EnrollmentController extends Controller
 
     public function store(Request $request, $courseId)
     {
+        $request->validate([
+            'transaction_id' => 'nullable|string',
+        ]);
+
         try {
-            $enrollment = $this->enrollmentService->enrollUser($request->user()->id, $courseId);
+            $enrollment = $this->enrollmentService->enrollUser(
+                $request->user()->id,
+                $courseId,
+                $request->transaction_id
+            );
+
             return response()->json([
                 'success' => true,
                 'message' => 'Enrolled successfully',

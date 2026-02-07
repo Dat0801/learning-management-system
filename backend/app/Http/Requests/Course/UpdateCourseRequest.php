@@ -18,7 +18,7 @@ class UpdateCourseRequest extends FormRequest
             'description' => ['sometimes', 'nullable', 'string'],
             'price' => ['sometimes', 'numeric', 'min:0'],
             'status' => ['sometimes', 'in:draft,published,archived'],
+            'thumbnail' => ['sometimes', 'nullable', 'image|mimes:jpeg,png,jpg,gif,webp|max:5120'],
         ];
     }
 }
-

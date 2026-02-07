@@ -19,6 +19,7 @@ class StoreCourseRequest extends FormRequest
             'price' => ['nullable', 'numeric', 'min:0'],
             'status' => ['nullable', 'in:draft,published,archived'],
             'category_id' => ['nullable', 'exists:categories,id'],
+            'thumbnail' => ['nullable', 'image|mimes:jpeg,png,jpg,gif,webp|max:5120'],
             'lessons' => ['nullable', 'array'],
             'lessons.*.title' => ['required', 'string'],
             'lessons.*.content' => ['nullable', 'string'],
@@ -29,4 +30,3 @@ class StoreCourseRequest extends FormRequest
         ];
     }
 }
-

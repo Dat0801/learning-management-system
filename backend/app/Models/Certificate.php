@@ -5,15 +5,20 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Enrollment extends Model
+class Certificate extends Model
 {
     use HasFactory;
 
     protected $fillable = [
         'user_id',
         'course_id',
-        'transaction_id',
-        'enrolled_at',
+        'certificate_number',
+        'issued_date',
+        'certificate_url',
+    ];
+
+    protected $casts = [
+        'issued_date' => 'date',
     ];
 
     public function user()
@@ -24,10 +29,5 @@ class Enrollment extends Model
     public function course()
     {
         return $this->belongsTo(Course::class);
-    }
-
-    public function transaction()
-    {
-        return $this->belongsTo(Transaction::class, 'transaction_id', 'transaction_id');
     }
 }
