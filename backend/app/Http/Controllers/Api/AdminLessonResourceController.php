@@ -18,17 +18,36 @@ class AdminLessonResourceController extends Controller
     {
         $request->validate([
             'title' => 'required|string|max:255',
-            'url' => 'required|string', // In real app, this would be a file upload handling
-            'type' => 'required|string',
+            'url' => 'nullable|string',
+            'file' => 'nullable|file|max:51200', // 50MB max
+            'type' => 'required|string|in:file,link,pdf,video',
         ]);
 
-        $resource = $lesson->resources()->create($request->all());
+        $data = [
+            'title' => $request->title,
+            'type' => $request->type,
+        ];
+
+        // Handle file upload
+        if ($request->hasFile('file')) {
+            $file = $request->file('file');
+            $filename = \Illuminate\Support\Str::uuid().'.'.$file->getClientOriginalExtension();
+            $folder = 'lesson-resources';
+            $path = $file->storeAs($folder, $filename, 'public');
+            $data['url'] = \Illuminate\Support\Facades\Storage::url($path);
+        } else {
+            $data['url'] = $request->url;
+        }
+
+        $resource = $lesson->resources()->create($data);
+
         return response()->json($resource, 201);
     }
 
     public function destroy(LessonResource $resource)
     {
         $resource->delete();
+
         return response()->json(['message' => 'Resource deleted successfully'], 204);
     }
 }

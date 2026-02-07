@@ -5,6 +5,9 @@ namespace App\Services;
 use App\Models\Course;
 use App\Notifications\CourseUpdated;
 use App\Repositories\Interfaces\CourseRepositoryInterface;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class CourseService
 {
@@ -37,6 +40,14 @@ class CourseService
 
     public function createCourse(array $data)
     {
+        // Handle thumbnail upload
+        if (isset($data['thumbnail']) && $data['thumbnail'] instanceof UploadedFile) {
+            $thumbnail = $data['thumbnail'];
+            $filename = Str::uuid().'.'.$thumbnail->getClientOriginalExtension();
+            $path = $thumbnail->storeAs('course-thumbnails', $filename, 'public');
+            $data['thumbnail'] = Storage::url($path);
+        }
+
         $course = $this->courseRepository->create($data);
 
         if (isset($data['lessons']) && is_array($data['lessons'])) {
@@ -58,6 +69,20 @@ class CourseService
 
         if (isset($data['status']) && $data['status'] === 'published' && $course->status !== 'published') {
             $data['published_at'] = now();
+        }
+
+        // Handle thumbnail upload
+        if (isset($data['thumbnail']) && $data['thumbnail'] instanceof UploadedFile) {
+            // Delete old thumbnail if exists
+            if ($course->thumbnail) {
+                $oldPath = str_replace(Storage::url(''), '', $course->thumbnail);
+                Storage::disk('public')->delete($oldPath);
+            }
+
+            $thumbnail = $data['thumbnail'];
+            $filename = Str::uuid().'.'.$thumbnail->getClientOriginalExtension();
+            $path = $thumbnail->storeAs('course-thumbnails', $filename, 'public');
+            $data['thumbnail'] = Storage::url($path);
         }
 
         $updatedCourse = $this->courseRepository->update($id, $data);

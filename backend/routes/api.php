@@ -9,6 +9,8 @@ use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\CertificateController;
 use App\Http\Controllers\Api\CourseController;
 use App\Http\Controllers\Api\EnrollmentController;
+use App\Http\Controllers\Api\FileUploadController;
+use App\Http\Controllers\Api\InstructorController;
 use App\Http\Controllers\Api\LessonController;
 use App\Http\Controllers\Api\LessonNoteController;
 use App\Http\Controllers\Api\LessonQuestionController;
@@ -96,6 +98,22 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/courses/{course}/certificate', [CertificateController::class, 'checkCertificate']);
     Route::get('/my-certificates', [CertificateController::class, 'myCertificates']);
     Route::get('/certificates/{certificateNumber}/download', [CertificateController::class, 'downloadCertificate']);
+
+    // File Upload Routes
+    Route::post('/upload/image', [FileUploadController::class, 'uploadImage']);
+    Route::post('/upload/video', [FileUploadController::class, 'uploadVideo']);
+    Route::post('/upload/document', [FileUploadController::class, 'uploadDocument']);
+    Route::post('/upload/resource', [FileUploadController::class, 'uploadResource']);
+    Route::delete('/upload/delete', [FileUploadController::class, 'deleteFile']);
+
+    // Instructor Routes
+    Route::middleware(['auth:sanctum', 'instructor'])->prefix('instructor')->group(function () {
+        Route::get('/dashboard/stats', [InstructorController::class, 'getDashboardStats']);
+        Route::get('/courses', [InstructorController::class, 'getMyCourses']);
+        Route::get('/courses/{course}/analytics', [InstructorController::class, 'getCourseAnalytics']);
+        Route::get('/revenue', [InstructorController::class, 'getRevenue']);
+        Route::get('/students', [InstructorController::class, 'getStudents']);
+    });
 });
 
 // Public certificate verification
