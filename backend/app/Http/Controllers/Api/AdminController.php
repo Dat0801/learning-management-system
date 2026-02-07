@@ -275,4 +275,178 @@ class AdminController extends Controller
 
         return response()->json($transaction);
     }
+
+    // Revenue Management
+    public function getRevenueStats(Request $request)
+    {
+        $query = Transaction::where('status', 'completed');
+
+        // Date range filter
+        if ($request->has('start_date')) {
+            $query->whereDate('paid_at', '>=', $request->start_date);
+        }
+        if ($request->has('end_date')) {
+            $query->whereDate('paid_at', '<=', $request->end_date);
+        }
+
+        $totalRevenue = (clone $query)->sum('amount');
+        $totalTransactions = (clone $query)->count();
+        $averageTransaction = $totalTransactions > 0 ? $totalRevenue / $totalTransactions : 0;
+
+        // Revenue by payment method
+        $revenueByMethod = (clone $query)
+            ->selectRaw('payment_method, SUM(amount) as total, COUNT(*) as count')
+            ->groupBy('payment_method')
+            ->get();
+
+        // Revenue by date (for chart)
+        $revenueByDate = (clone $query)
+            ->selectRaw('DATE(paid_at) as date, SUM(amount) as revenue, COUNT(*) as transactions')
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get();
+
+        // Top courses by revenue
+        $topCourses = (clone $query)
+            ->selectRaw('course_id, SUM(amount) as revenue, COUNT(*) as transactions')
+            ->with('course:id,title,instructor_id')
+            ->groupBy('course_id')
+            ->orderByDesc('revenue')
+            ->limit(10)
+            ->get();
+
+        // Revenue by instructor
+        $revenueByInstructor = Transaction::where('status', 'completed')
+            ->whereHas('course', function ($q) {
+                $q->whereNotNull('instructor_id');
+            })
+            ->join('courses', 'transactions.course_id', '=', 'courses.id')
+            ->join('users', 'courses.instructor_id', '=', 'users.id')
+            ->selectRaw('users.id, users.name, SUM(transactions.amount) as revenue, COUNT(transactions.id) as transactions')
+            ->groupBy('users.id', 'users.name')
+            ->orderByDesc('revenue')
+            ->get();
+
+        // Monthly comparison
+        $currentMonth = (clone $query)
+            ->whereMonth('paid_at', now()->month)
+            ->whereYear('paid_at', now()->year)
+            ->sum('amount');
+
+        $lastMonth = Transaction::where('status', 'completed')
+            ->whereMonth('paid_at', now()->subMonth()->month)
+            ->whereYear('paid_at', now()->subMonth()->year)
+            ->sum('amount');
+
+        $monthlyGrowth = $lastMonth > 0
+            ? round((($currentMonth - $lastMonth) / $lastMonth) * 100, 2)
+            : 0;
+
+        return response()->json([
+            'total_revenue' => $totalRevenue,
+            'total_transactions' => $totalTransactions,
+            'average_transaction' => round($averageTransaction, 2),
+            'current_month_revenue' => $currentMonth,
+            'last_month_revenue' => $lastMonth,
+            'monthly_growth_percentage' => $monthlyGrowth,
+            'revenue_by_method' => $revenueByMethod,
+            'revenue_by_date' => $revenueByDate,
+            'top_courses' => $topCourses,
+            'revenue_by_instructor' => $revenueByInstructor,
+        ]);
+    }
+
+    public function getRevenueByCourse(Request $request)
+    {
+        $query = Transaction::where('status', 'completed')
+            ->with('course.instructor')
+            ->selectRaw('course_id, SUM(amount) as revenue, COUNT(*) as transactions')
+            ->groupBy('course_id');
+
+        if ($request->has('start_date')) {
+            $query->whereDate('paid_at', '>=', $request->start_date);
+        }
+        if ($request->has('end_date')) {
+            $query->whereDate('paid_at', '<=', $request->end_date);
+        }
+
+        $results = $query->orderByDesc('revenue')
+            ->paginate($request->get('per_page', 15));
+
+        return response()->json($results);
+    }
+
+    public function getRevenueByInstructor(Request $request)
+    {
+        $query = Transaction::where('status', 'completed')
+            ->whereHas('course', function ($q) {
+                $q->whereNotNull('instructor_id');
+            })
+            ->join('courses', 'transactions.course_id', '=', 'courses.id')
+            ->join('users', 'courses.instructor_id', '=', 'users.id')
+            ->selectRaw('users.id, users.name, users.email, SUM(transactions.amount) as revenue, COUNT(transactions.id) as transactions')
+            ->groupBy('users.id', 'users.name', 'users.email');
+
+        if ($request->has('start_date')) {
+            $query->whereDate('transactions.paid_at', '>=', $request->start_date);
+        }
+        if ($request->has('end_date')) {
+            $query->whereDate('transactions.paid_at', '<=', $request->end_date);
+        }
+
+        $results = $query->orderByDesc('revenue')
+            ->paginate($request->get('per_page', 15));
+
+        return response()->json($results);
+    }
+
+    public function getRevenueReport(Request $request)
+    {
+        $request->validate([
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date',
+            'format' => 'nullable|in:json,csv',
+        ]);
+
+        $startDate = $request->start_date;
+        $endDate = $request->end_date;
+
+        $transactions = Transaction::where('status', 'completed')
+            ->whereBetween('paid_at', [$startDate, $endDate])
+            ->with(['user', 'course.instructor'])
+            ->orderBy('paid_at', 'desc')
+            ->get();
+
+        $summary = [
+            'period' => [
+                'start' => $startDate,
+                'end' => $endDate,
+            ],
+            'total_revenue' => $transactions->sum('amount'),
+            'total_transactions' => $transactions->count(),
+            'average_transaction' => $transactions->count() > 0
+                ? round($transactions->sum('amount') / $transactions->count(), 2)
+                : 0,
+            'revenue_by_method' => $transactions->groupBy('payment_method')
+                ->map(function ($group) {
+                    return [
+                        'revenue' => $group->sum('amount'),
+                        'count' => $group->count(),
+                    ];
+                }),
+        ];
+
+        if ($request->input('format') === 'csv') {
+            // In a real implementation, you would generate CSV here
+            return response()->json([
+                'message' => 'CSV export not yet implemented',
+                'data' => $transactions,
+            ]);
+        }
+
+        return response()->json([
+            'summary' => $summary,
+            'transactions' => $transactions,
+        ]);
+    }
 }

@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\AdminQuizController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\CertificateController;
+use App\Http\Controllers\Api\CouponController;
 use App\Http\Controllers\Api\CourseController;
 use App\Http\Controllers\Api\EnrollmentController;
 use App\Http\Controllers\Api\FileUploadController;
@@ -17,6 +18,7 @@ use App\Http\Controllers\Api\LessonQuestionController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\QuizController;
 use App\Http\Controllers\Api\ReviewController;
+use App\Http\Controllers\Api\SearchController;
 use App\Http\Controllers\Api\WishlistController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -32,6 +34,14 @@ Route::get('/categories', [CategoryController::class, 'index']);
 Route::get('/categories/{category}', [CategoryController::class, 'show']);
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
+Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
+Route::post('/reset-password', [AuthController::class, 'resetPassword']);
+Route::get('/email/verify/{id}/{hash}', [AuthController::class, 'verifyEmail'])
+    ->name('verification.verify');
+
+// Search routes (public)
+Route::get('/search', [SearchController::class, 'globalSearch']);
+Route::get('/search/courses', [SearchController::class, 'searchCoursesAdvanced']);
 
 // Public Course routes (with optional auth for enrollment status)
 Route::middleware('optional.auth')->group(function () {
@@ -53,6 +63,9 @@ Route::middleware('auth:sanctum')->group(function () {
     // Profile Management
     Route::put('/profile', [AuthController::class, 'updateProfile']);
     Route::put('/profile/password', [AuthController::class, 'changePassword']);
+
+    // Email Verification
+    Route::post('/email/verification-notification', [AuthController::class, 'sendVerificationEmail']);
 
     // Wishlist
     Route::get('/wishlist', [WishlistController::class, 'index']);
@@ -98,6 +111,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/courses/{course}/certificate', [CertificateController::class, 'checkCertificate']);
     Route::get('/my-certificates', [CertificateController::class, 'myCertificates']);
     Route::get('/certificates/{certificateNumber}/download', [CertificateController::class, 'downloadCertificate']);
+
+    // Coupons
+    Route::post('/coupons/validate', [CouponController::class, 'validateCoupon']);
 
     // File Upload Routes
     Route::post('/upload/image', [FileUploadController::class, 'uploadImage']);
@@ -175,4 +191,17 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
     // Transaction Management
     Route::get('/transactions', [AdminController::class, 'getAllTransactions']);
     Route::get('/transactions/{transaction}', [AdminController::class, 'getTransactionDetail']);
+
+    // Revenue Management
+    Route::get('/revenue/stats', [AdminController::class, 'getRevenueStats']);
+    Route::get('/revenue/by-course', [AdminController::class, 'getRevenueByCourse']);
+    Route::get('/revenue/by-instructor', [AdminController::class, 'getRevenueByInstructor']);
+    Route::get('/revenue/report', [AdminController::class, 'getRevenueReport']);
+
+    // Coupon Management
+    Route::get('/coupons', [CouponController::class, 'index']);
+    Route::post('/coupons', [CouponController::class, 'store']);
+    Route::get('/coupons/{coupon}', [CouponController::class, 'show']);
+    Route::put('/coupons/{coupon}', [CouponController::class, 'update']);
+    Route::delete('/coupons/{coupon}', [CouponController::class, 'destroy']);
 });

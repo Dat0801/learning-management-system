@@ -21,7 +21,17 @@ class CourseRepository implements CourseRepositoryInterface
         }
 
         if (isset($filters['search'])) {
-            $query->where('title', 'like', '%' . $filters['search'] . '%');
+            $searchTerm = $filters['search'];
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('title', 'like', "%{$searchTerm}%")
+                    ->orWhere('description', 'like', "%{$searchTerm}%")
+                    ->orWhereHas('instructor', function ($q) use ($searchTerm) {
+                        $q->where('name', 'like', "%{$searchTerm}%");
+                    })
+                    ->orWhereHas('category', function ($q) use ($searchTerm) {
+                        $q->where('name', 'like', "%{$searchTerm}%");
+                    });
+            });
         }
 
         return $query->get();
@@ -52,7 +62,7 @@ class CourseRepository implements CourseRepositoryInterface
 
     public function find($id)
     {
-        $course = Course::with(['instructor', 'category', 'lessons' => function($query) {
+        $course = Course::with(['instructor', 'category', 'lessons' => function ($query) {
             $query->orderBy('order');
         }])->findOrFail($id);
 
@@ -67,7 +77,7 @@ class CourseRepository implements CourseRepositoryInterface
                 ->whereIn('lesson_id', $course->lessons->pluck('id'))
                 ->pluck('lesson_id')
                 ->toArray();
-                
+
             foreach ($course->lessons as $lesson) {
                 $lesson->is_completed = in_array($lesson->id, $completedLessonIds);
             }
@@ -79,9 +89,9 @@ class CourseRepository implements CourseRepositoryInterface
         }
 
         // Security: Hide content and video_url for non-enrolled users unless it's a preview
-        if (!$course->is_enrolled) {
+        if (! $course->is_enrolled) {
             foreach ($course->lessons as $lesson) {
-                if (!$lesson->is_preview) {
+                if (! $lesson->is_preview) {
                     $lesson->makeHidden(['video_url', 'content']);
                 }
             }
@@ -99,6 +109,7 @@ class CourseRepository implements CourseRepositoryInterface
     {
         $course = Course::findOrFail($id);
         $course->update($data);
+
         return $course;
     }
 

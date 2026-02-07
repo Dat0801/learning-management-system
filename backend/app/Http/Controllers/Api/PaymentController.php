@@ -20,19 +20,28 @@ class PaymentController extends Controller
     {
         $request->validate([
             'course_id' => 'required|exists:courses,id',
+            'coupon_code' => 'nullable|string',
         ]);
 
         try {
             $course = Course::findOrFail($courseId);
             $user = $request->user();
 
-            $transaction = $this->paymentService->createPaymentIntent($user, $course);
+            $transaction = $this->paymentService->createPaymentIntent(
+                $user,
+                $course,
+                $request->coupon_code
+            );
+
+            $paymentDetails = $transaction->payment_details ?? [];
 
             return response()->json([
                 'success' => true,
                 'data' => [
                     'transaction_id' => $transaction->transaction_id,
                     'amount' => $transaction->amount,
+                    'original_amount' => $paymentDetails['original_amount'] ?? $transaction->amount,
+                    'discount_amount' => $paymentDetails['discount_amount'] ?? 0,
                     'currency' => $transaction->currency,
                     'status' => $transaction->status,
                     'payment_intent_id' => $transaction->payment_intent_id,

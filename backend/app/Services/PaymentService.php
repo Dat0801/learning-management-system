@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Coupon;
 use App\Models\Course;
 use App\Models\Transaction;
 use App\Models\User;
@@ -11,7 +12,14 @@ use Illuminate\Support\Str;
 
 class PaymentService
 {
-    public function createPaymentIntent(User $user, Course $course): Transaction
+    protected $couponService;
+
+    public function __construct(CouponService $couponService)
+    {
+        $this->couponService = $couponService;
+    }
+
+    public function createPaymentIntent(User $user, Course $course, ?string $couponCode = null): Transaction
     {
         // Check if course is free
         if ($course->price == 0) {
@@ -28,6 +36,23 @@ class PaymentService
             throw new Exception('Transaction already exists for this course.');
         }
 
+        // Calculate final amount with coupon if provided
+        $originalAmount = $course->price;
+        $finalAmount = $originalAmount;
+        $discountAmount = 0;
+        $couponId = null;
+
+        if ($couponCode) {
+            try {
+                $couponResult = $this->couponService->applyCoupon($couponCode, $originalAmount, $user, $course);
+                $finalAmount = $couponResult['final_amount'];
+                $discountAmount = $couponResult['discount_amount'];
+                $couponId = $couponResult['coupon']->id;
+            } catch (Exception $e) {
+                throw new Exception('Invalid coupon: '.$e->getMessage());
+            }
+        }
+
         // Generate unique transaction ID
         $transactionId = 'TXN-'.strtoupper(Str::random(12));
 
@@ -36,10 +61,16 @@ class PaymentService
             'user_id' => $user->id,
             'course_id' => $course->id,
             'transaction_id' => $transactionId,
-            'amount' => $course->price,
+            'amount' => $finalAmount,
             'currency' => 'USD',
             'status' => 'pending',
             'payment_method' => 'stripe',
+            'payment_details' => [
+                'original_amount' => $originalAmount,
+                'discount_amount' => $discountAmount,
+                'coupon_code' => $couponCode,
+                'coupon_id' => $couponId,
+            ],
         ]);
 
         // In a real implementation, you would create a Stripe PaymentIntent here
@@ -84,6 +115,20 @@ class PaymentService
         $transaction = $transaction->fresh();
         $course = $transaction->course;
         $user = $transaction->user;
+
+        // Record coupon usage if coupon was used
+        $paymentDetails = $transaction->payment_details ?? [];
+        if (isset($paymentDetails['coupon_id']) && $paymentDetails['coupon_id']) {
+            $coupon = Coupon::find($paymentDetails['coupon_id']);
+            if ($coupon && isset($paymentDetails['discount_amount'])) {
+                $this->couponService->recordUsage(
+                    $coupon,
+                    $user,
+                    $transaction->id,
+                    $paymentDetails['discount_amount']
+                );
+            }
+        }
 
         // Send payment confirmation notification
         if ($transaction->amount > 0) {
